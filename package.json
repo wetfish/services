@@ -1,0 +1,32 @@
+{
+    "name": "wetfish-services",
+    "version": "0.0.1",
+    "description": "IRC services for FishNet",
+    "author": "Rachel Fish <rachel@wetfish.net>",
+
+    "repository":
+    {
+        "type": "git",
+        "url": "https://github.com/wetfish/services"
+    },
+    
+    "bugs":
+    {
+        "url": "https://github.com/wetfish/services/issues"
+    },
+    
+    "keywords":
+    [
+        "wetfish",
+        "fishnet",
+        "irc",
+        "services",
+        "bot"
+    ],
+    
+    "dependencies":
+    {
+        "irc": "*",
+        "buffer-equal-constant-time": "*"
+    }
+}
