@@ -1,5 +1,5 @@
 module.exports = {
-    server: 'localhost',
+    server: 'irc.wetfish.net',
     port: 6697,
     secure: true,
     name: 'chanserv_',

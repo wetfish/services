@@ -1,7 +1,7 @@
 var output =
 {
     client: false,
-    methods: ['message', 'action', 'join', 'part', 'quit', 'nick', 'kick', 'error'],
+    methods: ['message', 'action', 'join', 'part', 'quit', 'nick', 'kick', 'error', 'raw'],
 
     message: function(from, to, message, details)
     {
@@ -42,6 +42,11 @@ var output =
     {
         console.log("/!\\ ERROR #"+error.rawCommand+": "+error.command+" /!\\");
         console.log(JSON.stringify(error));
+    },
+
+    raw: function()
+    {
+//        console.log(arguments);
     },
 
     bind: function()

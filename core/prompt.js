@@ -102,6 +102,8 @@ module.exports =
         {
             prompt.handle(line);
         });
+
+        core.prompt = prompt.readline;
     },
 
     // This function is called when this module is unloaded
@@ -111,6 +113,7 @@ module.exports =
         prompt.readline.close();
 
         // Clean up variables
+        delete core.prompt;
         delete readline;
         delete prompt;
     }
