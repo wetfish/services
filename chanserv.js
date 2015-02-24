@@ -8,7 +8,7 @@ var secrets = require("./config/secret.js");
 var client = new irc.Client(config.server, config.name, config);
 
 // Get modules that should be loaded immediately
-var modules = ['oper', 'nickserv']
+var modules = ['oper', 'chanserv']
 
 // Require core functions
 var core = require("./core.js");
