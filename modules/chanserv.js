@@ -1,16 +1,30 @@
 // Channel services
-
 var client, core;
 
 var chanserv =
 {
-    events: ['raw'],
+    events: ['raw', 'message'],
+    commands: ['register', 'mode', 'access', 'admin'],
 
+    // Event handlers
     raw: function(input)
     {
         if(input.command == "rpl_youreoper")
         {
             chanserv.init();
+        }
+    },
+
+    message: function(from, to, message)
+    {
+        message = message.split(" ");
+        var command = message.shift();
+
+        // If this is a valid command
+        if(chanserv.commands.indexOf(command) > -1)
+        {
+            // Call the handler function
+            chanserv['_'+command](message);
         }
     },
 
@@ -22,7 +36,29 @@ var chanserv =
         // Set nickname
         client.send('sanick', client.nick, 'ChanServ');
     },
+    
+    // User commands
+    _register: function()
+    {
+        console.log("this must be a great channel");
+    },
 
+    _mode: function()
+    {
+        console.log("control freak?");
+    },
+
+    _access: function()
+    {
+        console.log("so permissive~");
+    },
+
+    _admin: function()
+    {
+        console.log("friendship engaged");
+    },
+
+    // General helpers
     bind: function()
     {
         for(var i = 0, l = chanserv.events.length; i < l; i++)
