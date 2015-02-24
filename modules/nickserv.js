@@ -5,13 +5,28 @@ var client, core;
 
 var nickserv =
 {
-    events: ['raw'],
+    events: ['raw', 'message'],
+    commands: ['register', 'auth', 'login', 'host'],
 
+    // Event handlers
     raw: function(input)
     {
         if(input.command == "rpl_youreoper")
         {
             nickserv.init();
+        }
+    },
+
+    message: function(from, to, message)
+    {
+        message = message.split(" ");
+        var command = message.shift();
+
+        // If this is a valid command
+        if(nickserv.commands.indexOf(command) > -1)
+        {
+            // Call the handler function
+            nickserv['_'+command](message);
         }
     },
 
@@ -24,6 +39,28 @@ var nickserv =
         client.send('sanick', client.nick, 'NickServ');
     },
 
+    // User commands
+    _register: function()
+    {
+        console.log("YOU WANNA REGISTER?");
+    },
+
+    _auth: function()
+    {
+        console.log("Nice token babe");
+    },
+
+    _login: function()
+    {
+        console.log("Yay a password");
+    },
+
+    _host: function()
+    {
+        console.log("ur very crative");
+    },
+
+    // General helpers
     bind: function()
     {
         for(var i = 0, l = nickserv.events.length; i < l; i++)
