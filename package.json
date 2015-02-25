@@ -27,6 +27,10 @@
     "dependencies":
     {
         "irc": "*",
-        "buffer-equal-constant-time": "*"
+        "buffer-equal-constant-time": "*",
+        "express": "*",
+        "redis": "*",
+        "bcrypt": "*",
+        "mysql": "*"
     }
 }
