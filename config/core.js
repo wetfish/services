@@ -1,1 +1,1 @@
-module.exports = ['prompt', 'output'];
+module.exports = ['model', 'prompt', 'output'];

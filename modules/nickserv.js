@@ -1,6 +1,4 @@
 // Nickname services
-// raw: rpl_youreoper
-
 var client, core;
 
 var nickserv =
@@ -22,11 +20,14 @@ var nickserv =
         message = message.split(" ");
         var command = message.shift();
 
+        // Only accept PMs
+        if(to != client.nick) return;
+
         // If this is a valid command
         if(nickserv.commands.indexOf(command) > -1)
         {
             // Call the handler function
-            nickserv['_'+command](message);
+            nickserv['_'+command](from, message);
         }
     },
 
@@ -40,9 +41,14 @@ var nickserv =
     },
 
     // User commands
-    _register: function()
+    _register: function(user, message)
     {
-        console.log("YOU WANNA REGISTER?");
+        var temporary = message.join(" ");
+        console.log("Saving temporary password...");
+
+        // Save specified password for 1 hour (plaintext, ugh!)
+        core.model.redis.set(user, temporary, 'ex', 3600);
+        client.say(user, "Cool beans bro");
     },
 
     _auth: function()

@@ -16,8 +16,10 @@ app.get('/login', function(req, res)
     login.verify(req.query.token, function(verified)
     {
         if(verified.status == "success")
-            res.end("Here's the data you allowed to be shared:\n\n" + JSON.stringify(verified.data, null, 4));
+            res.send("Thank you for logging in! To complete the registration process, please paste the following command into IRC:<p><b>/msg nickserv auth "+req.query.token+"</b></p>");
         else
-            res.end("There was an error!\n\n" + verified.message);
+            res.send("There was an error!<p><b>" + verified.message + "</b></p>");
+
+        res.end();
     });
 });
