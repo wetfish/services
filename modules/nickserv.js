@@ -1,5 +1,6 @@
 // Nickname services
 var client, core;
+var login = require("./login/sdk/server/wetfish-login");
 
 var nickserv =
 {
@@ -48,12 +49,28 @@ var nickserv =
 
         // Save specified password for 1 hour (plaintext, ugh!)
         core.model.redis.set(user, temporary, 'ex', 3600);
-        client.say(user, "Cool beans bro");
+        client.say(user, "Thank you for registering on FishNet! Please visit https://services.wetfish.net/ to verify your account.");
     },
 
-    _auth: function()
+    _auth: function(user, message)
     {
-        console.log("Nice token babe");
+        var token = message.shift();
+
+        console.log("Verifying specified token...");
+        login.verify(req.query.token, function(verified)
+        {
+            if(verified.status == "success")
+            {
+                core.model.redis.get(user, function(error, response)
+                {
+                    client.say(user, "Your account has now been verified. Would you like to use the password ");
+                });
+            }
+            else
+            {
+
+            }
+        });
     },
 
     _login: function()
@@ -93,6 +110,9 @@ module.exports =
         client = _client;
         core = _core;
 
+        // Initialize wetfish login
+        login.init(core.secrets.login);
+
         // Bind event listeners
         nickserv.bind();
     },
@@ -102,6 +122,6 @@ module.exports =
         // Unbind event listeners
         nickserv.unbind();
         
-        delete client, core, nickserv;
+        delete client, core, login, nickserv;
     }
 }

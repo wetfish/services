@@ -33,7 +33,7 @@ var model =
     {
         model.redis.quit();
         model.mysql.end();
-    }
+    },
 
     error: function(error)
     {
