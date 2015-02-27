@@ -7,6 +7,8 @@ var client, core;
 // Database model
 var model =
 {
+    events: ['error'],
+    
     // Database connection variables
     redis: false,
     mysql: false,
@@ -32,6 +34,43 @@ var model =
         model.redis.quit();
         model.mysql.end();
     }
+
+    error: function(error)
+    {
+        console.log('Database Error!', error);
+        if(error.code === 'PROTOCOL_CONNECTION_LOST')
+        {
+            model.disconnect();
+
+            // Try reconnecting in a few seconds...
+            setTimeout(function()
+            {
+                model.connect();
+            }, 3000);
+        }
+        else
+        {
+            throw error;
+        }
+    },
+
+    bind: function()
+    {
+        for(var i = 0, l = model.events.length; i < l; i++)
+        {
+            var event = model.events[i];
+            model.mysql.addListener(event, output[event]);
+        }
+    },
+
+    unbind: function()
+    {
+        for(var i = 0, l = model.events.length; i < l; i++)
+        {
+            var event = model.events[i];
+            model.mysql.removeListener(event, output[event]);
+        }
+    }
 };
 
 module.exports =
@@ -42,12 +81,15 @@ module.exports =
         core = _core;
 
         model.connect();
+        model.bind();
+        
         core.model = model;
     },
     
     unload: function(_client, _core)
     {
         model.disconnect();
+        model.unbind();
         
         delete core.model;
         delete client, core, model;
