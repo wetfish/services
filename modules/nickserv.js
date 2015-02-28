@@ -1,6 +1,6 @@
 // Nickname services
 var client, core;
-var login = require("./login/sdk/server/wetfish-login");
+var login = require("../login/sdk/server/wetfish-login");
 
 var nickserv =
 {

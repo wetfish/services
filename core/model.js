@@ -40,6 +40,7 @@ var model =
         console.log('Database Error!', error);
         if(error.code === 'PROTOCOL_CONNECTION_LOST')
         {
+            console.log("Try to reconnect...");
             model.disconnect();
 
             // Try reconnecting in a few seconds...
@@ -50,6 +51,7 @@ var model =
         }
         else
         {
+            console.log("THROW UP!!");
             throw error;
         }
     },
@@ -59,7 +61,7 @@ var model =
         for(var i = 0, l = model.events.length; i < l; i++)
         {
             var event = model.events[i];
-            model.mysql.addListener(event, output[event]);
+            model.mysql.addListener(event, model[event]);
         }
     },
 
@@ -68,7 +70,7 @@ var model =
         for(var i = 0, l = model.events.length; i < l; i++)
         {
             var event = model.events[i];
-            model.mysql.removeListener(event, output[event]);
+            model.mysql.removeListener(event, model[event]);
         }
     }
 };
