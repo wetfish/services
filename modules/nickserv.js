@@ -83,9 +83,20 @@ var nickserv =
         }
     },
 
-    redis_message: function()
+    redis_message: function(command, user)
     {
-        console.log(arguments);
+        if(command == 'register')
+        {
+            client.say(user, "WOOOOOOOW YOU'RE REGISTERED NOW!!!");
+        }
+        else if(command == 'login')
+        {
+            client.say(user, "BOOM. LOGIN BABY@");
+        }
+        else if(command == 'ghost')
+        {
+            client.say(user, "ur ded lmao");
+        }
     },
 
     //
@@ -126,7 +137,7 @@ var nickserv =
         if(target)
         {
             // Generate a unique token for this request
-            core.model.token.set(user, "ghost", function(token)
+            core.model.token.set(target, "ghost", function(token)
             {
                 // Notify the user
                 client.say(user, "User "+target+" will be disconnected! Please visit https://services.wetfish.net/token/"+token+" to authorize this action.");
