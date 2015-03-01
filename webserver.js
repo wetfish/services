@@ -72,6 +72,9 @@ app.get('/token/:token', function(req, res)
         }
         else
         {
+            // Delete token after use
+            model.token.delete(req.params.token);
+            
             var authorized = JSON.parse(response);
             var user = {session: req.session.user, name: authorized.user};
             

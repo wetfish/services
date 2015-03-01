@@ -107,8 +107,8 @@ var model =
                     callback(false);
                 }
                 
-                // Save this token for 5 minutes
-                model.redis.set("token:" + token, JSON.stringify(data), 'ex', 300, function(error, response)
+                // Save this token for 15 minutes
+                model.redis.set("token:" + token, JSON.stringify(data), 'ex', 900, function(error, response)
                 {
                     if(error)
                     {
@@ -125,6 +125,11 @@ var model =
         get: function(token, callback)
         {
             model.redis.get("token:" + token, callback);
+        },
+
+        delete: function(token, callback)
+        {
+            model.redis.del("token:" + token, callback);
         }
     },
 
@@ -159,7 +164,7 @@ var model =
                         model.mysql.query("Insert into `names` set ?, `registered` = now(), `active` = now()", data);
 
                         // Add one to the user names count
-                        model.mysql.query("Update `accounts` set `names` = `names` + 1", function(error, response)
+                        model.mysql.query("Update `accounts` set `names` = `names` + 1 where `account_id` = ?", user.account_id, function(error, response)
                         {
                             // Return callback with user data
                             model.user.get({account_id: user.account_id}, callback);
@@ -205,6 +210,24 @@ var model =
         {
             select = model.where(select);
             model.mysql.query("Select * from `names` where "+select.where, select.values, callback);
+        },
+
+        // Set a user's hostname
+        host: function(user, host, callback)
+        {
+            // Get account info
+            model.user.name({name: user}, function(error, response)
+            {
+                if(error || !response.length)
+                {
+                    callback(error, response);
+                }
+                else
+                {
+                    var name = response[0];
+                    model.mysql.query("Update `accounts` set `host` = ? where `account_id` = ?", [host, name.account_id], callback);
+                }
+            });
         }
     },
 

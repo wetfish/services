@@ -4,6 +4,9 @@ var login = require("../login/sdk/server/wetfish-login");
 
 var nickserv =
 {
+    // Object for storing user modes
+    modes: {},
+
     //
     // General functions
     ////////////////////////////////////////
@@ -65,6 +68,17 @@ var nickserv =
         {
             nickserv.init();
         }
+
+        // User mode information sent with whois
+        else if(input.rawCommand == 379)
+        {
+            var user = input.args[1];
+            var modes = input.args[2].match(/^is using modes \+([^ ]*)/);
+            
+            nickserv.modes[user] = modes[1];
+        }
+
+//        console.log(arguments);
     },
 
     client_message: function(from, to, message)
@@ -113,6 +127,11 @@ var nickserv =
                         client.say(user.name, "But watch out, you can't fit any more names on this account!");
                     }
                     
+                    if(account.host)
+                    {
+                        client.send('chghost', user.name, account.host);
+                    }
+                    
                     client.send('samode', user.name, '+r');
                 }
             });            
@@ -140,6 +159,11 @@ var nickserv =
                     {
                         core.model.user.login(user.name);
                         client.send('samode', user.name, '+r');
+
+                        if(account.host)
+                        {
+                            client.send('chghost', user.name, account.host);
+                        }
 
                         client.say(user.name, "You are now logged in!");
                     }
@@ -267,10 +291,50 @@ var nickserv =
         }
     },
 
-    _host: function()
+    _host: function(user, message)
     {
-        // Check if user is logged in
-        console.log("ur very crative");
+        var hostname = message.shift();
+        
+        // Check if this user is logged in
+        client.whois(user, function()
+        {
+            if(nickserv.modes[user] && nickserv.modes[user].indexOf('r') > -1)
+            {
+                // Make sure this hostname doesn't have any funky characters
+                if(hostname && hostname.match(/^[a-z0-9._-]+$/i))
+                {
+                    // Make sure this hostname isn't in the list of reserved names
+                    if(core.secrets.hostnames.indexOf(hostname) == -1 && !hostname.match(/^Fish-/i))
+                    {
+                        // Register this hostname!
+                        core.model.user.host(user, hostname, function(error, response)
+                        {
+                            if(!error)
+                            {
+                                client.say(user, "Good choice! Your new hostname has been saved.");
+                                client.send('chghost', user, hostname);
+                            }
+                            else
+                            {
+                                client.say(user, "Sorry! This hostname is already in use.");
+                            }
+                        });
+                    }
+                    else
+                    {
+                        client.say(user, "Sorry! The hostname you requested can't be registered.");
+                    }
+                }
+                else
+                {
+                    client.say(user, "Sorry! Your hostname can't have any special characters. Please try again.");
+                }
+            }
+            else
+            {
+                client.say(user, "Error! You must be logged in to set a hostname.");
+            }
+        });
     },
 }
 
