@@ -90,24 +90,35 @@ var nickserv =
         
         if(command == 'register')
         {
-            client.say(user.name, "Congrats! You're the proud new owner of the name "+user.name);
+            core.model.user.register(user, function(error, account)
+            {
+                if(error)
+                {
+                    console.log(error);
+                }
+                else
+                {
+                    client.say(user.name, "Congrats! You're the proud new owner of the name "+user.name);
+                    var slots = 3 - account.names.length;
 
-            var slots = 2;
+                    if(slots > 1)
+                    {
+                        client.say(user.name, "You can register up to "+slots+" more names");
+                    }
+                    else if(slots == 1)
+                    {
+                        client.say(user.name, "You can register 1 more name");
+                    }
+                    else
+                    {
+                        client.say(user.name, "But you can't fit any more names on this account!");
+                    }
+                    
+                    client.send('samode', user.name, '+r');
+                }
 
-            if(slots > 1)
-            {
-                client.say(user.name, "You can register up to 2 more names");
-            }
-            else if(slots == 1)
-            {
-                client.say(user.name, "You can register 1 more name");
-            }
-            else
-            {
-                client.say(user.name, "But you can't fit any more names on this account!");
-            }
-            
-            client.send('samode', user.name, '+r');
+               console.log(account);
+            });            
         }
         else if(command == 'login')
         {

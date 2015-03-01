@@ -48,6 +48,24 @@ var model =
         model.mysql.end();
     },
 
+    // Function to generate select statements from objects
+    where: function(select, glue)
+    {
+        if(typeof glue == "undefined")
+            glue = " and ";
+
+        var where = [];
+        var values = [];
+        
+        for(var i = 0, keys = Object.keys(select), l = keys.length; i < l; i++)
+        {
+            where.push(model.mysql.escapeId(keys[i]) + ' = ?');
+            values.push(select[keys[i]]);
+        }
+
+        return {where: where.join(glue), values: values};
+    },
+
     token:
     {
         generate: function(callback)
@@ -110,6 +128,82 @@ var model =
         }
     },
 
+    user:
+    {
+        register: function(auth, callback)
+        {            
+            // Try to insert new user account, don't worry if there's a duplicate
+            model.mysql.query("Insert into `accounts` set ?", {fish_id: auth.session.user_id}, function(error, response)
+            {
+                if(error)
+                {
+                    // Log out the error, just in case...
+                    console.log(error, response);
+                }
+
+                model.user.get({fish_id: auth.session.user_id}, function(error, user)
+                {
+                    if(error)
+                    {
+                        console.log(error, response);
+                    }
+                    else
+                    {
+                        var data =
+                        {
+                            account_id: user.account_id,
+                            name: auth.name
+                        };
+                        
+                        // Insert new user name
+                        model.mysql.query("Insert into `names` set ?, `registered` = now(), `active` = now()", data);
+
+                        // Add one to the user names count
+                        model.mysql.query("Update `accounts` set `names` = `names` + 1", function(error, response)
+                        {
+                            // Return callback with user data
+                            model.user.get({account_id: user.account_id}, callback);
+                        });
+                    }
+                });
+            });
+        },
+
+        login: function(user, callback)
+        {
+            // Update user activity time
+        },
+
+        // Get user data
+        get: function(select, callback)
+        {
+            // Get account data
+            select = model.where(select);
+            model.mysql.query("Select * from `accounts` where "+select.where+" limit 1", select.values, function(error, response)
+            {
+                if(error || !response.length)
+                {
+                    callback(error, response);
+                }
+                else
+                {
+                    var account = response[0];
+
+                    // Get user names
+                    model.mysql.query("Select * from `names` where `account_id`= ?", account.account_id, function(error, response)
+                    {
+                        account.names = response;
+                        callback(error, account);
+                    });
+                }
+            });
+        }
+    },
+
+    channel:
+    {
+
+    },
 
     // Database triggered events
     ////////////////////////////////////////
@@ -117,6 +211,7 @@ var model =
     mysql_error: function(error)
     {
         console.log('Database Error!', error);
+
         if(error.code === 'PROTOCOL_CONNECTION_LOST')
         {
             console.log("Reconnecting...");
@@ -127,10 +222,6 @@ var model =
             {
                 model.connect();
             }, 3000);
-        }
-        else
-        {
-            throw error;
         }
     },
 

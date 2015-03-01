@@ -64,7 +64,7 @@ app.get('/token/:token', function(req, res)
     delete req.session.token;
     
     // Process current token
-    model.redis.get("token:" + req.params.token, function(error, response)
+    model.token.get(req.params.token, function(error, response)
     {
         if(error || !response)
         {
