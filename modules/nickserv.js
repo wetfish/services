@@ -86,7 +86,6 @@ var nickserv =
     redis_message: function(command, user)
     {
         user = JSON.parse(user);
-        console.log(user);
         
         if(command == 'register')
         {
@@ -119,8 +118,37 @@ var nickserv =
             });            
         }
         else if(command == 'login')
-        {
-            client.say(user.name, "BOOM. LOGIN BABY@");
+        {            
+            // Get account information for the current user's session
+            core.model.user.get({fish_id: user.session.user_id}, function(error, account)
+            {
+                if(!error)
+                {
+                    // Look for the target in the current user's list of names
+                    var valid = false;
+
+                    for(var i = 0, l = account.names.length; i < l; i++)
+                    {
+                        if(account.names[i].name == user.name)
+                        {
+                            valid = true;
+                            break;
+                        }
+                    }
+
+                    if(valid)
+                    {
+                        core.model.user.login(user.name);
+                        client.send('samode', user.name, '+r');
+
+                        client.say(user.name, "You are now logged in!");
+                    }
+                    else
+                    {
+                        client.say(user.name, "Hrm... it doesn't seem like you own this name.");
+                    }
+                }
+            });
         }
         else if(command == 'ghost')
         {

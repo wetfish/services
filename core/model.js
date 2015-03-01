@@ -172,6 +172,7 @@ var model =
         login: function(user, callback)
         {
             // Update user activity time
+            model.mysql.query("Update `names` set `active` = now() where `name` = ?", user, callback);
         },
 
         // Get all user data
@@ -183,7 +184,7 @@ var model =
             {
                 if(error || !response.length)
                 {
-                    callback(error, response);
+                    callback(error, {names: []});
                 }
                 else
                 {
@@ -192,7 +193,7 @@ var model =
                     // Now get all user names
                     model.user.name({account_id: account.account_id}, function(error, response)
                     {
-                        account.names = response;
+                        account.names = (response || []);
                         callback(error, account);
                     });
                 }
