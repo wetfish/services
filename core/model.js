@@ -21,7 +21,13 @@ var model =
     // Function to connect to our databases
     connect: function(config)
     {
+        // Main redis connection
         model.redis = redis.createClient(6303);
+
+        // Redis connection for IPC
+        model.redisIPC = redis.createClient(6303);
+
+        // MySQL connection
         model.mysql = mysql.createConnection(
         {
             host     : 'localhost',
@@ -37,6 +43,8 @@ var model =
     disconnect: function()
     {
         model.redis.quit();
+        model.redisIPC.quit();
+        
         model.mysql.end();
     },
 
@@ -165,6 +173,14 @@ var model =
 
 module.exports =
 {
+    // Function to get the model when loaded by the webserver
+    get: function(_core)
+    {
+        core = _core;
+        return model;
+    },
+
+    // Called when this file is loaded as a bot module
     load: function(_client, _core)
     {
         client = _client;
@@ -175,7 +191,7 @@ module.exports =
         
         core.model = model;
     },
-    
+
     unload: function(_client, _core)
     {
         model.disconnect();

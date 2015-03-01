@@ -29,7 +29,7 @@ var nickserv =
         for(var i = 0, l = nickserv.events.redis.length; i < l; i++)
         {
             var event = nickserv.events.redis[i];
-            core.model.redis.addListener(event, nickserv["redis_" + event]);
+            core.model.redisIPC.addListener(event, nickserv["redis_" + event]);
         }
     },
 
@@ -44,7 +44,7 @@ var nickserv =
         for(var i = 0, l = nickserv.events.redis.length; i < l; i++)
         {
             var event = nickserv.events.redis[i];
-            core.model.redis.removeListener(event, nickserv["redis_" + event]);
+            core.model.redisIPC.removeListener(event, nickserv["redis_" + event]);
         }
     },
 
@@ -56,7 +56,7 @@ var nickserv =
     events:
     {
         client: ['raw', 'message'],
-        redis: ['ready', 'message']
+        redis: ['message']
     },
 
     client_raw: function(input)
@@ -81,11 +81,6 @@ var nickserv =
             // Call bot command handler function
             nickserv['_'+command](from, message);
         }
-    },
-
-    redis_ready: function()
-    {
-        console.log(arguments);
     },
 
     redis_message: function()
@@ -159,6 +154,11 @@ module.exports =
 
         // Initialize wetfish login
         login.init(core.secrets.login);
+
+        // Subscribe to redis authorization events
+        core.model.redisIPC.subscribe("register");
+        core.model.redisIPC.subscribe("login");
+        core.model.redisIPC.subscribe("ghost");
 
         // Bind event listeners
         nickserv.bind();
