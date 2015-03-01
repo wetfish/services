@@ -116,8 +116,6 @@ var nickserv =
                     
                     client.send('samode', user.name, '+r');
                 }
-
-               console.log(account);
             });            
         }
         else if(command == 'login')
@@ -126,7 +124,36 @@ var nickserv =
         }
         else if(command == 'ghost')
         {
-            client.say(user.name, "ur ded lmao");
+            user.name = JSON.parse(user.name);
+
+            // Get account information for the current user's session
+            core.model.user.get({fish_id: user.session.user_id}, function(error, account)
+            {
+                if(!error)
+                {
+                    // Look for the target in the current user's list of names
+                    var valid = false;
+
+                    for(var i = 0, l = account.names.length; i < l; i++)
+                    {
+                        if(account.names[i].name == user.name.target)
+                        {
+                            valid = true;
+                            break;
+                        }
+                    }
+
+                    if(valid)
+                    {
+                        client.send('kill', user.name.target, 'GHOST command used by '+user.name.current);
+                        client.say(user.name.current, "The user has been disconnected.");
+                    }
+                    else
+                    {
+                        client.say(user.name.current, "Hrm... it doesn't seem like you own that name.");
+                    }
+                }
+            });
         }
     },
 
@@ -160,28 +187,51 @@ var nickserv =
     _login: function(user, message)
     {
         // Check if username is actually registered
-        
-        // Generate a unique token for this request
-        core.model.token.set(user, "login", function(token)
+        core.model.user.name({name: user}, function(error, response)
         {
-            // Notify the user
-            client.say(user, "Logging in as "+user+"! Please visit https://services.wetfish.net/token/"+token+" to authorize this action.");
+            if(!response.length)
+            {
+                client.say(user, "Sorry friend, this name isn't registered.");
+            }
+            else
+            {
+                // Generate a unique token for this request
+                core.model.token.set(user, "login", function(token)
+                {
+                    // Notify the user
+                    client.say(user, "Logging in as "+user+"! Please visit https://services.wetfish.net/token/"+token+" to authorize this action.");
+                });
+            }
         });
     },
 
     _ghost: function(user, message)
     {
         var target = message.shift();
-        // Check if target is a registered name
 
-        if(target)
+        if(target && target != user)
         {
-            // Generate a unique token for this request
-            core.model.token.set(target, "ghost", function(token)
+            // Check if target is a registered name
+            core.model.user.name({name: target}, function(error, response)
             {
-                // Notify the user
-                client.say(user, "User "+target+" will be disconnected! Please visit https://services.wetfish.net/token/"+token+" to authorize this action.");
+                if(!response.length)
+                {
+                    client.say(user, "Sorry friend, but the name "+target+" isn't registered.");
+                }
+                else
+                {
+                    // Generate a unique token for this request
+                    core.model.token.set(JSON.stringify({current: user, target: target}), "ghost", function(token)
+                    {
+                        // Notify the user
+                        client.say(user, "User "+target+" will be disconnected! Please visit https://services.wetfish.net/token/"+token+" to authorize this action.");
+                    });
+                }
             });
+        }
+        else if(target == user)
+        {
+            client.say(user, "Trying to kill yourself?");
         }
         else
         {
