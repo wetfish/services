@@ -31,6 +31,8 @@
         "express": "*",
         "redis": "*",
         "bcrypt": "*",
-        "mysql": "*"
+        "mysql": "*",
+        "express-session": "*",
+        "connect-redis": "*"
     }
 }
