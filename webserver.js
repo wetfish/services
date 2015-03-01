@@ -73,8 +73,9 @@ app.get('/token/:token', function(req, res)
         else
         {
             var authorized = JSON.parse(response);
-            model.redisIPC.publish(authorized.command, authorized.user);
-
+            var user = {session: req.session.user, name: authorized.user};
+            
+            model.redisIPC.publish(authorized.command, JSON.stringify(user));
             res.send("Thank you! Your request has been authorized.");
         }
 

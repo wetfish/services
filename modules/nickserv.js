@@ -85,17 +85,37 @@ var nickserv =
 
     redis_message: function(command, user)
     {
+        user = JSON.parse(user);
+        console.log(user);
+        
         if(command == 'register')
         {
-            client.say(user, "WOOOOOOOW YOU'RE REGISTERED NOW!!!");
+            client.say(user.name, "Congrats! You're the proud new owner of the name "+user.name);
+
+            var slots = 2;
+
+            if(slots > 1)
+            {
+                client.say(user.name, "You can register up to 2 more names");
+            }
+            else if(slots == 1)
+            {
+                client.say(user.name, "You can register 1 more name");
+            }
+            else
+            {
+                client.say(user.name, "But you can't fit any more names on this account!");
+            }
+            
+            client.send('samode', user.name, '+r');
         }
         else if(command == 'login')
         {
-            client.say(user, "BOOM. LOGIN BABY@");
+            client.say(user.name, "BOOM. LOGIN BABY@");
         }
         else if(command == 'ghost')
         {
-            client.say(user, "ur ded lmao");
+            client.say(user.name, "ur ded lmao");
         }
     },
 
