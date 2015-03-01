@@ -107,7 +107,7 @@ module.exports =
     },
 
     // This function is called when this module is unloaded
-    unload: function()
+    unload: function(client, core)
     {
         // Stop requesting input
         prompt.readline.close();

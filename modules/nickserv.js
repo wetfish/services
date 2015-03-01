@@ -44,12 +44,12 @@ var nickserv =
     // User commands
     _register: function(user, message)
     {
-        var temporary = message.join(" ");
-        console.log("Saving temporary password...");
-
-        // Save specified password for 1 hour (plaintext, ugh!)
-        core.model.redis.set(user, temporary, 'ex', 3600);
-        client.say(user, "Thank you for registering on FishNet! Please visit https://services.wetfish.net/ to verify your account.");
+        // Generate a unique token for this request
+        core.model.token.set(user, "register", function(token)
+        {
+            // Notify the user
+            client.say(user, "Thank you for registering on FishNet! Please visit https://services.wetfish.net/token/"+token+" to verify your account.");
+        });
     },
 
     _auth: function(user, message)
