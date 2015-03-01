@@ -111,7 +111,7 @@ var nickserv =
                     }
                     else
                     {
-                        client.say(user.name, "But you can't fit any more names on this account!");
+                        client.say(user.name, "But watch out, you can't fit any more names on this account!");
                     }
                     
                     client.send('samode', user.name, '+r');
@@ -139,13 +139,22 @@ var nickserv =
     _register: function(user, message)
     {
         // Check if username is already registered
-        
-        // Generate a unique token for this request
-        core.model.token.set(user, "register", function(token)
+        core.model.user.name({name: user}, function(error, response)
         {
-            // Notify the user
-            client.say(user, "Thank you for registering on FishNet! Please visit https://services.wetfish.net/token/"+token+" to verify your account.");
-        });
+            if(response.length)
+            {
+                client.say(user, "Sorry friend, this name is already registered.");
+            }
+            else
+            {
+                // Generate a unique token for this request
+                core.model.token.set(user, "register", function(token)
+                {
+                    // Notify the user
+                    client.say(user, "Thank you for registering on FishNet! Please visit https://services.wetfish.net/token/"+token+" to verify your account.");
+                });
+            }
+        });        
     },
 
     _login: function(user, message)

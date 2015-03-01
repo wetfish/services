@@ -174,10 +174,10 @@ var model =
             // Update user activity time
         },
 
-        // Get user data
+        // Get all user data
         get: function(select, callback)
         {
-            // Get account data
+            // First get account data
             select = model.where(select);
             model.mysql.query("Select * from `accounts` where "+select.where+" limit 1", select.values, function(error, response)
             {
@@ -189,14 +189,21 @@ var model =
                 {
                     var account = response[0];
 
-                    // Get user names
-                    model.mysql.query("Select * from `names` where `account_id`= ?", account.account_id, function(error, response)
+                    // Now get all user names
+                    model.user.name({account_id: account.account_id}, function(error, response)
                     {
                         account.names = response;
                         callback(error, account);
                     });
                 }
             });
+        },
+
+        // Get name data
+        name: function(select, callback)
+        {
+            select = model.where(select);
+            model.mysql.query("Select * from `names` where "+select.where, select.values, callback);
         }
     },
 
