@@ -8,7 +8,11 @@ var client, core;
 // Database model
 var model =
 {
-    events: ['error'],
+    events:
+    {
+        mysql: ['error'],
+        redis: ['ready']
+    },
     
     // Database connection variables
     redis: false,
@@ -98,7 +102,11 @@ var model =
         }
     },
 
-    error: function(error)
+
+    // Database triggered events
+    ////////////////////////////////////////
+    
+    mysql_error: function(error)
     {
         console.log('Database Error!', error);
         if(error.code === 'PROTOCOL_CONNECTION_LOST')
@@ -118,21 +126,39 @@ var model =
         }
     },
 
+    redis_ready: function()
+    {
+        console.log("Connected to redis.");
+    },
+
+    // Helper functions to bind and unbind model events
     bind: function()
     {
-        for(var i = 0, l = model.events.length; i < l; i++)
+        for(var i = 0, l = model.events.mysql.length; i < l; i++)
         {
-            var event = model.events[i];
-            model.mysql.addListener(event, model[event]);
+            var event = model.events.mysql[i];
+            model.mysql.addListener(event, model["mysql_" + event]);
+        }
+
+        for(var i = 0, l = model.events.redis.length; i < l; i++)
+        {
+            var event = model.events.redis[i];
+            model.redis.addListener(event, model["redis_" + event]);
         }
     },
 
     unbind: function()
     {
-        for(var i = 0, l = model.events.length; i < l; i++)
+        for(var i = 0, l = model.events.mysql.length; i < l; i++)
         {
-            var event = model.events[i];
-            model.mysql.removeListener(event, model[event]);
+            var event = model.events.mysql[i];
+            model.mysql.removeListener(event, model["mysql_" + event]);
+        }
+
+        for(var i = 0, l = model.events.redis.length; i < l; i++)
+        {
+            var event = model.events.redis[i];
+            model.redis.removeListener(event, model["redis_" + event]);
         }
     }
 };
@@ -159,5 +185,3 @@ module.exports =
         delete client, core, crypto, model;
     }
 }
-
-
