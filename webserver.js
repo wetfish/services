@@ -69,6 +69,7 @@ app.get('/token/:token', function(req, res)
         if(error || !response)
         {
             res.send("Sorry, this token isn't valid. It may have expired!");
+            console.log("Expired token: ", req.params.token);
         }
         else
         {
@@ -77,7 +78,9 @@ app.get('/token/:token', function(req, res)
             
             var authorized = JSON.parse(response);
             var user = {session: req.session.user, name: authorized.user};
-            
+
+            console.log("Valid token: ", req.params.token, user);
+
             model.redisIPC.publish(authorized.command, JSON.stringify(user));
             res.send("Thank you! Your request has been authorized.");
         }

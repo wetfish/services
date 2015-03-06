@@ -247,11 +247,13 @@ var model =
         {
             console.log("Reconnecting...");
             model.disconnect();
+            model.unbind();
 
             // Try reconnecting in a few seconds...
             setTimeout(function()
             {
                 model.connect();
+                model.bind();
             }, 3000);
         }
     },
