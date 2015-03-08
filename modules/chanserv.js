@@ -3,30 +3,12 @@ var client, core;
 
 var chanserv =
 {
-    events: ['raw', 'message'],
-    commands: ['register', 'mode', 'access', 'admin'],
+    // Object for storing user modes
+    modes: {},
 
-    // Event handlers
-    raw: function(input)
-    {
-        if(input.command == "rpl_youreoper")
-        {
-            chanserv.init();
-        }
-    },
-
-    message: function(from, to, message)
-    {
-        message = message.split(" ");
-        var command = message.shift();
-
-        // If this is a valid command
-        if(chanserv.commands.indexOf(command) > -1)
-        {
-            // Call the handler function
-            chanserv['_'+command](message);
-        }
-    },
+    //
+    // General functions
+    ////////////////////////////////////////
 
     // Initialize services after authentication
     init: function()
@@ -37,7 +19,90 @@ var chanserv =
         client.send('sanick', client.nick, 'ChanServ');
     },
     
-    // User commands
+    // Bind and unbind events
+    bind: function()
+    {
+        for(var i = 0, l = chanserv.events.client.length; i < l; i++)
+        {
+            var event = chanserv.events.client[i];
+            client.addListener(event, chanserv["client_" + event]);
+        }
+
+        for(var i = 0, l = chanserv.events.redis.length; i < l; i++)
+        {
+            var event = chanserv.events.redis[i];
+            core.model.redisIPC.addListener(event, chanserv["redis_" + event]);
+        }
+    },
+
+    unbind: function()
+    {
+        for(var i = 0, l = chanserv.events.client.length; i < l; i++)
+        {
+            var event = chanserv.events.client[i];
+            client.removeListener(event, chanserv["client_" + event]);
+        }
+
+        for(var i = 0, l = chanserv.events.redis.length; i < l; i++)
+        {
+            var event = chanserv.events.redis[i];
+            core.model.redisIPC.removeListener(event, chanserv["redis_" + event]);
+        }
+    },
+
+    //
+    // Event handlers
+    ////////////////////////////////////////
+
+    events:
+    {
+        client: ['raw', 'message'],
+        redis: ['message']
+    },
+
+    client_raw: function(input)
+    {
+        if(input.command == "rpl_youreoper")
+        {
+            chanserv.init();
+        }
+
+        // User mode information sent with whois
+        else if(input.rawCommand == 379)
+        {
+            var user = input.args[1];
+            var modes = input.args[2].match(/^is using modes \+([^ ]*)/);
+            
+            chanserv.modes[user] = modes[1];
+        }
+
+//        console.log(arguments);
+    },
+
+    client_message: function(from, to, message)
+    {
+        message = message.split(" ");
+        var command = message.shift();
+
+        // If this is a valid command
+        if(chanserv.commands.indexOf(command) > -1)
+        {
+            // Call bot command handler function
+            chanserv['_'+command](from, message);
+        }
+    },
+
+    redis_message: function()
+    {
+        console.log(arguments);
+    },
+
+    //
+    // Bot commands
+    ////////////////////////////////////////
+    
+    commands: ['register', 'mode', 'access', 'admin', 'owner'],
+
     _register: function()
     {
         console.log("this must be a great channel");
@@ -58,24 +123,10 @@ var chanserv =
         console.log("friendship engaged");
     },
 
-    // General helpers
-    bind: function()
+    _owner: function()
     {
-        for(var i = 0, l = chanserv.events.length; i < l; i++)
-        {
-            var event = chanserv.events[i];
-            client.addListener(event, chanserv[event]);
-        }
+        console.log("goodbye old friend");
     },
-
-    unbind: function()
-    {
-        for(var i = 0, l = chanserv.events.length; i < l; i++)
-        {
-            var event = chanserv.events[i];
-            client.removeListener(event, chanserv[event]);
-        }
-    }
 }
 
 module.exports =
