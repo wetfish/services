@@ -1,4 +1,5 @@
 // Required modules
+var events = require('events');
 var redis = require('redis');
 var mysql = require('mysql');
 var crypto = require('crypto');
@@ -8,6 +9,7 @@ var client, core;
 // Database model
 var model =
 {
+    event: new events.EventEmitter(),    
     events:
     {
         mysql: ['error'],
@@ -38,6 +40,7 @@ var model =
         });
 
         model.mysql.connect();
+        model.event.emit('connected');
     },
 
     disconnect: function()

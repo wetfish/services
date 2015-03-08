@@ -1,5 +1,5 @@
 // Channel services
-var client, core;
+var client, core, model;
 
 var chanserv =
 {
@@ -23,7 +23,7 @@ var chanserv =
     auth: function(username, callback)
     {
         // Check if username is actually registered
-        core.model.user.name({name: username}, function(error, response)
+        model.user.name({name: username}, function(error, response)
         {
             if(error || !response.length)
             {
@@ -57,7 +57,7 @@ var chanserv =
         for(var i = 0, l = chanserv.events.redis.length; i < l; i++)
         {
             var event = chanserv.events.redis[i];
-            core.model.redisIPC.addListener(event, chanserv["redis_" + event]);
+            model.redisIPC.addListener(event, chanserv["redis_" + event]);
         }
     },
 
@@ -72,7 +72,7 @@ var chanserv =
         for(var i = 0, l = chanserv.events.redis.length; i < l; i++)
         {
             var event = chanserv.events.redis[i];
-            core.model.redisIPC.removeListener(event, chanserv["redis_" + event]);
+            model.redisIPC.removeListener(event, chanserv["redis_" + event]);
         }
     },
 
@@ -148,10 +148,24 @@ var chanserv =
         {
             if(error)
             {
-                client.say(username, "Sorry! You need to be logged in to do this.");
+                client.say(username, "Sorry! You need to be logged in to do this. Please register with NickServ before registering a channel.");
                 return;
             }
 
+            // Check if the channel is already registered
+
+            // Join the channel
+            client.join(channel, function()
+            {
+                console.log(client.chans[channel]);
+                console.log(arguments);
+            });
+
+            // Check who is currently in the channel
+            client.send('names', channel);
+
+            // Is the requesting user is +o?
+            
             client.say(username, "Wow what a great channel");
         });
     },
@@ -183,6 +197,7 @@ module.exports =
     {
         client = _client;
         core = _core;
+        model = _core.model;
 
         // Bind event listeners
         chanserv.bind();
@@ -193,6 +208,6 @@ module.exports =
         // Unbind event listeners
         chanserv.unbind();
         
-        delete client, core, chanserv;
+        delete client, core, model, chanserv;
     }
 }

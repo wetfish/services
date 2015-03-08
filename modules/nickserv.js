@@ -1,5 +1,5 @@
 // Nickname services
-var client, core;
+var client, core, model;
 var login = require("../login/sdk/server/wetfish-login");
 
 var nickserv =
@@ -20,9 +20,20 @@ var nickserv =
         client.send('sanick', client.nick, 'NickServ');
     },
 
+    // Subscribe to redis authorization events
+    subscribe: function()
+    {
+        model.redisIPC.subscribe("register");
+        model.redisIPC.subscribe("login");
+        model.redisIPC.subscribe("ghost");
+    },
+
     // Bind and unbind events
     bind: function()
     {
+        // Subscribe to redis again if the database reconnects
+        model.event.addListener('connected', nickserv.subscribe);
+
         for(var i = 0, l = nickserv.events.client.length; i < l; i++)
         {
             var event = nickserv.events.client[i];
@@ -32,12 +43,14 @@ var nickserv =
         for(var i = 0, l = nickserv.events.redis.length; i < l; i++)
         {
             var event = nickserv.events.redis[i];
-            core.model.redisIPC.addListener(event, nickserv["redis_" + event]);
+            model.redisIPC.addListener(event, nickserv["redis_" + event]);
         }
     },
 
     unbind: function()
     {
+        model.event.removeListener('connected', nickserv.subscribe);
+
         for(var i = 0, l = nickserv.events.client.length; i < l; i++)
         {
             var event = nickserv.events.client[i];
@@ -47,7 +60,7 @@ var nickserv =
         for(var i = 0, l = nickserv.events.redis.length; i < l; i++)
         {
             var event = nickserv.events.redis[i];
-            core.model.redisIPC.removeListener(event, nickserv["redis_" + event]);
+            model.redisIPC.removeListener(event, nickserv["redis_" + event]);
         }
     },
 
@@ -103,7 +116,7 @@ var nickserv =
         
         if(command == 'register')
         {
-            core.model.user.register(user, function(error, account)
+            model.user.register(user, function(error, account)
             {
                 if(error)
                 {
@@ -139,7 +152,7 @@ var nickserv =
         else if(command == 'login')
         {            
             // Get account information for the current user's session
-            core.model.user.get({fish_id: user.session.user_id}, function(error, account)
+            model.user.get({fish_id: user.session.user_id}, function(error, account)
             {
                 if(!error)
                 {
@@ -157,7 +170,7 @@ var nickserv =
 
                     if(valid)
                     {
-                        core.model.user.login(user.name);
+                        model.user.login(user.name);
                         client.send('samode', user.name, '+r');
 
                         if(account.host)
@@ -179,7 +192,7 @@ var nickserv =
             user.name = JSON.parse(user.name);
 
             // Get account information for the current user's session
-            core.model.user.get({fish_id: user.session.user_id}, function(error, account)
+            model.user.get({fish_id: user.session.user_id}, function(error, account)
             {
                 if(!error)
                 {
@@ -218,7 +231,7 @@ var nickserv =
     _register: function(user, message)
     {
         // Check if username is already registered
-        core.model.user.name({name: user}, function(error, response)
+        model.user.name({name: user}, function(error, response)
         {
             if(response.length)
             {
@@ -227,7 +240,7 @@ var nickserv =
             else
             {
                 // Generate a unique token for this request
-                core.model.token.set(user, "register", function(token)
+                model.token.set(user, "register", function(token)
                 {
                     // Notify the user
                     client.say(user, "Thank you for registering on FishNet! Please visit https://services.wetfish.net/token/"+token+" to verify your account.");
@@ -239,7 +252,7 @@ var nickserv =
     _login: function(user, message)
     {
         // Check if username is actually registered
-        core.model.user.name({name: user}, function(error, response)
+        model.user.name({name: user}, function(error, response)
         {
             if(!response.length)
             {
@@ -248,7 +261,7 @@ var nickserv =
             else
             {
                 // Generate a unique token for this request
-                core.model.token.set(user, "login", function(token)
+                model.token.set(user, "login", function(token)
                 {
                     // Notify the user
                     client.say(user, "Logging in as "+user+"! Please visit https://services.wetfish.net/token/"+token+" to authorize this action.");
@@ -264,7 +277,7 @@ var nickserv =
         if(target && target != user)
         {
             // Check if target is a registered name
-            core.model.user.name({name: target}, function(error, response)
+            model.user.name({name: target}, function(error, response)
             {
                 if(!response.length)
                 {
@@ -273,7 +286,7 @@ var nickserv =
                 else
                 {
                     // Generate a unique token for this request
-                    core.model.token.set(JSON.stringify({current: user, target: target}), "ghost", function(token)
+                    model.token.set(JSON.stringify({current: user, target: target}), "ghost", function(token)
                     {
                         // Notify the user
                         client.say(user, "User "+target+" will be disconnected! Please visit https://services.wetfish.net/token/"+token+" to authorize this action.");
@@ -307,7 +320,7 @@ var nickserv =
                     if(core.secrets.hostnames.indexOf(hostname) == -1 && !hostname.match(/^Fish-/i))
                     {
                         // Register this hostname!
-                        core.model.user.host(user, hostname, function(error, response)
+                        model.user.host(user, hostname, function(error, response)
                         {
                             if(!error)
                             {
@@ -344,14 +357,13 @@ module.exports =
     {
         client = _client;
         core = _core;
+        model = _core.model;
 
         // Initialize wetfish login
         login.init(core.secrets.login);
 
-        // Subscribe to redis authorization events
-        core.model.redisIPC.subscribe("register");
-        core.model.redisIPC.subscribe("login");
-        core.model.redisIPC.subscribe("ghost");
+        // Subscribe to redis events
+        nickserv.subscribe();
 
         // Bind event listeners
         nickserv.bind();
@@ -362,6 +374,6 @@ module.exports =
         // Unbind event listeners
         nickserv.unbind();
         
-        delete client, core, login, nickserv;
+        delete client, core, login, model, nickserv;
     }
 }
