@@ -18,6 +18,32 @@ var chanserv =
         // Set nickname
         client.send('sanick', client.nick, 'ChanServ');
     },
+
+    // Check if a user is logged in
+    auth: function(username, callback)
+    {
+        // Check if username is actually registered
+        core.model.user.name({name: username}, function(error, response)
+        {
+            if(error || !response.length)
+            {
+                return callback(true);
+            }
+
+            var user = response[0];
+            
+            // Now check if this user is logged in
+            client.whois(username, function()
+            {
+                if(chanserv.modes[username] && chanserv.modes[username].indexOf('r') > -1)
+                {
+                    return callback(false, user);
+                }
+
+                return callback(true);
+            });
+        });
+    },
     
     // Bind and unbind events
     bind: function()
@@ -87,8 +113,14 @@ var chanserv =
         // If this is a valid command
         if(chanserv.commands.indexOf(command) > -1)
         {
+            // Check if a channel is specified in the command
+            if(message[0] && message[0].indexOf('#') == 0)
+            {
+                to = message.shift();
+            }
+            
             // Call bot command handler function
-            chanserv['_'+command](from, message);
+            chanserv['_'+command](from, to, message);
         }
     },
 
@@ -103,12 +135,28 @@ var chanserv =
     
     commands: ['register', 'mode', 'access', 'admin', 'owner'],
 
-    _register: function()
+    _register: function(username, channel, input)
     {
-        console.log("this must be a great channel");
+        if(channel.indexOf('#') != 0)
+        {
+            client.say(username, "This command must be used in a channel or by specifying the channel as the first parameter.");
+            client.say(username, "For example: /msg ChanServ register #wetfish");
+            return;
+        }
+        
+        chanserv.auth(username, function(error, user)
+        {
+            if(error)
+            {
+                client.say(username, "Sorry! You need to be logged in to do this.");
+                return;
+            }
+
+            client.say(username, "Wow what a great channel");
+        });
     },
 
-    _mode: function()
+    _mode: function(from, to, input)
     {
         console.log("control freak?");
     },
