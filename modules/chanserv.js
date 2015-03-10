@@ -1,6 +1,8 @@
-// Channel services
+var events = require('events')
+var event = new events.EventEmitter();
 var client, core, model;
 
+// Channel services
 var chanserv =
 {
     // Object for storing user modes
@@ -100,6 +102,11 @@ var chanserv =
             var modes = input.args[2].match(/^is using modes \+([^ ]*)/);
             
             chanserv.modes[user] = modes[1];
+        }
+
+        else if(input.command == "rpl_namreply")
+        {
+            console.log(arguments);
         }
 
 //        console.log(arguments);
@@ -208,6 +215,6 @@ module.exports =
         // Unbind event listeners
         chanserv.unbind();
         
-        delete client, core, model, chanserv;
+        delete events, event, client, core, model, chanserv;
     }
 }
