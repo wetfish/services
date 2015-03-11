@@ -157,7 +157,12 @@ var chanserv =
         else if(input.command == "rpl_endofnames")
         {
             var channel = input.args[1];
-            console.log(chanserv.channels[channel]);
+
+            // Emit custom names event
+            event.emit('names' + channel, chanserv.channels[channel]);
+
+            // Delete temporary user list
+            delete chanserv.channels[channel];
         }
 
 //        console.log(arguments);
@@ -210,13 +215,23 @@ var chanserv =
                 return;
             }
 
-            // Check if the channel is already registered
+            // TODO: Check if the channel is already registered
+
             // Check who is currently in the channel
             client.send('names', channel);
 
-            // Is the requesting user is +o?
-            
-            client.say(username, "Wow what a great channel");
+            event.once('names' + channel, function(userlist)
+            {
+                // Is the requesting user is +o?
+                if(userlist[username] == "o")
+                {
+                    client.say(username, "Hey you're an op and everything");
+                }
+                else
+                {
+                    client.say(username, "Sorry! Only channel operators (+o) can register a channel.");
+                }
+            });
         });
     },
 
