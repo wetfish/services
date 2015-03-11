@@ -1,3 +1,4 @@
+var extend = require('util')._extend;
 var events = require('events')
 var event = new events.EventEmitter();
 var client, core, model;
@@ -5,8 +6,8 @@ var client, core, model;
 // Channel services
 var chanserv =
 {
-    // Object for storing user modes
-    modes: {},
+    modes: {},          // Object for storing user modes from whois data
+    channels: {},       // Temporary object for storing names in channels being verified
 
     //
     // General functions
@@ -45,6 +46,42 @@ var chanserv =
                 return callback(true);
             });
         });
+    },
+
+    // Parse user names and modes from a names reply
+    names: function(text)
+    {
+        var statuses =
+        {
+            '~': 'q',
+            '&': 'a',
+            '@': 'o',
+            '%': 'h',
+            '+': 'v'
+        };
+        
+        // Ensure text is a string
+        text = (typeof text == "string") ? text : '';
+        var names = text.split(' ');
+        var output = {};
+        
+        for(var i = 0, l = names.length; i < l; i++)
+        {
+            var name = names[i];
+            var status = name[0];
+
+            if(statuses[status])
+            {
+                name = name.substr(1);
+                output[name] = statuses[status];
+            }
+            else
+            {
+                output[name] = '';
+            }
+        }
+
+        return output;
     },
     
     // Bind and unbind events
@@ -106,7 +143,21 @@ var chanserv =
 
         else if(input.command == "rpl_namreply")
         {
-            console.log(arguments);
+            var channel = input.args[2];
+            var names = input.args[3];
+
+            if(typeof chanserv.channels[channel] == "undefined")
+            {
+                chanserv.channels[channel] = {};
+            }
+
+            chanserv.channels[channel] = extend(chanserv.channels[channel], chanserv.names(names));
+        }
+
+        else if(input.command == "rpl_endofnames")
+        {
+            var channel = input.args[1];
+            console.log(chanserv.channels[channel]);
         }
 
 //        console.log(arguments);
@@ -160,14 +211,6 @@ var chanserv =
             }
 
             // Check if the channel is already registered
-
-            // Join the channel
-            client.join(channel, function()
-            {
-                console.log(client.chans[channel]);
-                console.log(arguments);
-            });
-
             // Check who is currently in the channel
             client.send('names', channel);
 
@@ -215,6 +258,6 @@ module.exports =
         // Unbind event listeners
         chanserv.unbind();
         
-        delete events, event, client, core, model, chanserv;
+        delete extend, events, event, client, core, model, chanserv;
     }
 }
