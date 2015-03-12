@@ -18,15 +18,24 @@ var model =
     redis: false,
     mysql: false,
 
-    // Function to connect to our databases
+    // Functions to connect to our databases
     connect: function(config)
+    {
+        model.connect_redis(config);
+        model.connect_mysql(config);
+    },
+
+    connect_redis: function(config)
     {
         // Main redis connection
         model.redis = redis.createClient(6303);
 
         // Redis connection for IPC
         model.redisIPC = redis.createClient(6303);
+    },
 
+    connect_mysql: function(config)
+    {
         // MySQL connection
         model.mysql = mysql.createConnection(
         {
@@ -38,12 +47,6 @@ var model =
         });
 
         model.mysql.connect();
-
-        // If a core event emitter exists
-        if(core.event)
-        {
-            core.event.emit('connected');
-        }
     },
 
     disconnect: function()
@@ -247,18 +250,25 @@ var model =
     
     mysql_error: function(error)
     {
-        console.log('Database Error!', error);
+        console.log('MySQL Error!', error);
 
-        if(error.code === 'PROTOCOL_CONNECTION_LOST')
+        // Array of expected errors we should recover from
+        var errors =
+        [
+            'PROTOCOL_CONNECTION_LOST',
+            'ECONNREFUSED',
+        ];
+
+        if(errors.indexOf(error.code) > -1)
         {
             console.log("Reconnecting...");
-            model.disconnect();
+            model.mysql.end();
             model.unbind();
 
             // Try reconnecting in a few seconds...
             setTimeout(function()
             {
-                model.connect();
+                model.connect_mysql();
                 model.bind();
             }, 3000);
         }
@@ -267,6 +277,12 @@ var model =
     redis_ready: function()
     {
         console.log("Connected to redis.");
+
+        // If a core event emitter exists
+        if(core.event)
+        {
+            core.event.emit('redis_ready');
+        }
     },
 
     // Helper functions to bind and unbind model events
