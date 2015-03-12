@@ -1,4 +1,5 @@
 var fs = require('fs');
+var events = require('events');
 
 // Core functions for loading and reloading modules
 module.exports = (function()
@@ -14,6 +15,9 @@ module.exports = (function()
         init: function(client, modules, secrets)
         {
             core.secrets = secrets;
+
+            // A persistent event emitter for cross-module communication
+            core.event = new events.EventEmitter();
             
             // Only set the client if it hasn't been initialized yet
             if(!core.client)

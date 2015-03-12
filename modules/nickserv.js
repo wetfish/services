@@ -32,7 +32,7 @@ var nickserv =
     bind: function()
     {
         // Subscribe to redis again if the database reconnects
-        model.event.addListener('connected', nickserv.subscribe);
+        core.event.addListener('connected', nickserv.subscribe);
 
         for(var i = 0, l = nickserv.events.client.length; i < l; i++)
         {
@@ -49,7 +49,7 @@ var nickserv =
 
     unbind: function()
     {
-        model.event.removeListener('connected', nickserv.subscribe);
+        core.event.removeListener('connected', nickserv.subscribe);
 
         for(var i = 0, l = nickserv.events.client.length; i < l; i++)
         {
