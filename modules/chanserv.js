@@ -166,6 +166,15 @@ var chanserv =
             delete chanserv.channels[channel];
         }
 
+        else if(input.command == "rpl_channelmodeis")
+        {
+            var channel = input.args[1];
+            var modes = input.args.slice(2).join(' ');
+
+            // Emit custom mode event
+            event.emit('mode' + channel, modes);
+        }
+
 //        console.log(arguments);
     },
 
@@ -212,7 +221,6 @@ var chanserv =
         {
             if(error)
             {
-                console.log("UGH");
                 console.log(error);
                 client.say(username, "Sorry! You need to be logged in to do this. Please register with NickServ before registering a channel.");
                 return;
@@ -241,11 +249,21 @@ var chanserv =
                             client.say(username, "Sorry! "+channel+" is already registered.");
                             return;
                         }
+
+                        client.say(username, "Congratulations! "+channel+ " is now registered to you.");
+
+                        // Give current username admin access
+//                        model.channel.access();                        
                         
                         // Join channel
+                        client.join(channel);
+
                         // Save current channel modes
-                        // Give current username admin access
-                        client.say(username, "Congratulations! "+channel+ " belongs to you.");
+                        event.once('mode' + channel, function(modes)
+                        {
+                            model.channel.set({name: channel}, {modes: modes});
+                            console.log("Default channel modes saved:", modes);
+                        });
                     });
                 }
                 else

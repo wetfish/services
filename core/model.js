@@ -246,6 +246,19 @@ var model =
         {
             model.mysql.query("Insert into `channels` set ?, `registered` = now()", channel, callback);
         },
+
+        set: function(select, data, callback)
+        {
+            select = model.where(select);
+            select.values.unshift(data);
+            
+            model.mysql.query("Update `channels` set ? where "+select.where, select.values, callback);
+        },
+
+        access: function(channel, user, callback)
+        {
+
+        }
     },
 
     // Database triggered events
