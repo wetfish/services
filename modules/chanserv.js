@@ -30,6 +30,7 @@ var chanserv =
         {
             if(error || !response.length)
             {
+                console.log(error, response);
                 return callback(true);
             }
 
@@ -211,11 +212,11 @@ var chanserv =
         {
             if(error)
             {
+                console.log("UGH");
+                console.log(error);
                 client.say(username, "Sorry! You need to be logged in to do this. Please register with NickServ before registering a channel.");
                 return;
             }
-
-            // TODO: Check if the channel is already registered
 
             // Check who is currently in the channel
             client.send('names', channel);
@@ -225,7 +226,27 @@ var chanserv =
                 // Is the requesting user is +o?
                 if(userlist[username] == "o")
                 {
-                    client.say(username, "Hey you're an op and everything");
+                    // Try to create the new channel
+                    var channel_data =
+                    {
+                        name: channel,
+                        owner: user.account_id
+                    }
+
+                    model.channel.register(channel_data, function(error, response)
+                    {
+                        if(error)
+                        {
+                            console.log(error);
+                            client.say(username, "Sorry! "+channel+" is already registered.");
+                            return;
+                        }
+                        
+                        // Join channel
+                        // Save current channel modes
+                        // Give current username admin access
+                        client.say(username, "Congratulations! "+channel+ " belongs to you.");
+                    });
                 }
                 else
                 {

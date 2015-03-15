@@ -145,7 +145,7 @@ var model =
     user:
     {
         register: function(auth, callback)
-        {            
+        {
             // Try to insert new user account, don't worry if there's a duplicate
             model.mysql.query("Insert into `accounts` set ?", {fish_id: auth.session.user_id}, function(error, response)
             {
@@ -242,7 +242,10 @@ var model =
 
     channel:
     {
-
+        register: function(channel, callback)
+        {
+            model.mysql.query("Insert into `channels` set ?, `registered` = now()", channel, callback);
+        },
     },
 
     // Database triggered events
