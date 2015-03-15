@@ -269,9 +269,12 @@ var model =
             select.values.unshift(data);
             
             model.mysql.query("Update `channels` set ? where "+select.where, select.values, callback);
-        },
+        }
+   },
 
-        access: function(select, action, data, callback)
+    access:
+    {
+        add: function(select, data, callback)
         {
             // Get channel data
             model.channel.get(select, function(error, channel)
@@ -281,31 +284,47 @@ var model =
                     return callback(error, channel);
                 }
 
-                if(action == 'add')
-                {
-                    // Clone the insert data before adding the channel ID
-                    var insert = JSON.parse(JSON.stringify(data));
-                    insert.channel_id = channel.channel_id;
-                    
-                    model.mysql.query("Insert into `access` set ? on duplicate key update ?", [insert, data], callback);
-                }
-                else if(action == 'remove')
-                {
-                    model.mysql.query("Delete from `access` where `channel_id` = ? and `account_id` = ?", [channel.channel_id, data.account_id], callback);
-                }
+                // Clone the insert data before adding the channel ID
+                var insert = JSON.parse(JSON.stringify(data));
+                insert.channel_id = channel.channel_id;
+                
+                model.mysql.query("Insert into `access` set ? on duplicate key update ?", [insert, data], callback);
             });
         },
 
-        admin: function(select, action, data, callback)
+        get: function(select, callback)
         {
-            if(action == 'add')
+            // Get user data
+            model.user.name({name: select.user}, function(error, response)
             {
+                if(error || !response.length)
+                {
+                    callback(error, response);
+                    return;
+                }
 
-            }
-            else if(action == 'remove')
-            {
+                var user = response[0];
+                
+                // Get channel data
+                model.channel.get({name: select.channel}, function(error, channel)
+                {
+                    if(error || !response.length)
+                    {
+                        callback(error, response);
+                        return;
+                    }
 
-            }
+                    var channel = response[0];
+                    
+                    // Select this user from the access table
+                    model.mysql.query("Select * from `access` where `channel_id` = ? and `account_id` = ?", [channel.channel_id, user.account_id], callback);
+                });
+            });
+        },
+
+        delete: function(select, callback)
+        {
+            model.mysql.query("Delete from `access` where `channel_id` = ? and `account_id` = ?", [select.channel_id, select.account_id], callback);
         }
     },
 
