@@ -49,6 +49,43 @@ var chanserv =
         });
     },
 
+    // Apply saved user modes
+    modes: function(channel, username)
+    {
+        // See if this user is logged in
+        chanserv.auth(username, function(error, user)
+        {
+            if(error)
+            {
+                return;
+            }
+
+            // See if this user has access
+            model.access.get({channel: channel, user: username}, function(error, response)
+            {
+                if(response.length)
+                {
+                    var access = response[0];
+
+                    if(!access.modes.length)
+                    {
+                        return;
+                    }
+                    
+                    // Create an array with the user's name repeated as many times as they have modes
+                    var input = Array.prototype.map.call([]+Array(access.modes.length),function(){ return username; })
+
+                    // Put other arguments into the input array
+                    input.unshift(access.modes);
+                    input.unshift(channel);
+                    input.unshift('samode');
+                    
+                    client.send.apply(client, input);
+                }
+            });
+        });
+    },
+
     // Parse user names and modes from a names reply
     names: function(text)
     {
@@ -197,40 +234,10 @@ var chanserv =
         }
     },
 
+    // Apply modes when users join channels
     client_join: function(channel, username, details)
     {
-        // See if this user is logged in
-        chanserv.auth(username, function(error, user)
-        {
-            if(error)
-            {
-                return;
-            }
-
-            // See if this user has access
-            model.access.get({channel: channel, user: username}, function(error, response)
-            {
-                if(response.length)
-                {
-                    var access = response[0];
-
-                    if(!access.modes.length)
-                    {
-                        return;
-                    }
-                    
-                    // Create an array with the user's name repeated as many times as they have modes
-                    var input = Array.prototype.map.call([]+Array(access.modes.length),function(){ return username; })
-
-                    // Put other arguments into the input array
-                    input.unshift(access.modes);
-                    input.unshift(channel);
-                    input.unshift('samode');
-                    
-                    client.send.apply(client, input);
-                }
-            });
-        });
+        chanserv.modes(channel, username);
     },
 
     redis_message: function()
@@ -242,7 +249,7 @@ var chanserv =
     // Bot commands
     ////////////////////////////////////////
     
-    commands: ['register', 'mode', 'access', 'admin', 'owner'],
+    commands: ['register', 'mode', 'access', 'admin', 'owner', '!op', '!power'],
 
     _register: function(username, channel, input)
     {
@@ -342,6 +349,18 @@ var chanserv =
     {
         console.log("goodbye old friend");
     },
+
+    '_!op': function(from, to, input)
+    {
+        console.log(arguments);
+        chanserv.modes(to, from);
+    },
+
+    // Wrapper for !op
+    '_!power': function(from, to, input)
+    {
+        chanserv['_!op'](from, to, input);
+    }
 }
 
 module.exports =
