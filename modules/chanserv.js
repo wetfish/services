@@ -252,11 +252,24 @@ var chanserv =
 
                         client.say(username, "Congratulations! "+channel+ " is now registered to you.");
 
-                        // Give current username admin access
-//                        model.channel.access();                        
+                        // Give current user admin access
+                        var access =
+                        {
+                            account_id: user.account_id,
+                            admin: 1,
+                            modes: '+o'
+                        }
                         
+                        model.channel.access({name: channel}, 'add', access);
+                        
+                        // Set registered channel modes
+                        client.send('samode', channel, '+Pr');
+
                         // Join channel
-                        client.join(channel);
+                        client.join(channel, function()
+                        {
+                            client.send('samode', channel, '+qo', 'ChanServ', 'ChanServ');
+                        });
 
                         // Save current channel modes
                         event.once('mode' + channel, function(modes)

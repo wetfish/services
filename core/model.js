@@ -242,12 +242,12 @@ var model =
 
     channel:
     {
-        register: function(channel, callback)
+        register: function(data, callback)
         {
-            model.mysql.query("Insert into `channels` set ?, `registered` = now()", channel, callback);
+            model.mysql.query("Insert into `channels` set ?, `registered` = now()", data, callback);
         },
 
-        get: function(channel, callback)
+        get: function(select, callback)
         {
             select = model.where(select);
             model.mysql.query("Select * from `channels` where "+select.where+" limit 1", select.values, function(error, response)
@@ -263,17 +263,49 @@ var model =
             });
         },
 
-        set: function(channel, data, callback)
+        set: function(select, data, callback)
         {
-            select = model.where(channel);
+            select = model.where(select);
             select.values.unshift(data);
             
             model.mysql.query("Update `channels` set ? where "+select.where, select.values, callback);
         },
 
-        access: function(channel, action, data, callback)
+        access: function(select, action, data, callback)
         {
+            // Get channel data
+            model.channel.get(select, function(error, channel)
+            {
+                if(error || !channel)
+                {
+                    return callback(error, channel);
+                }
 
+                if(action == 'add')
+                {
+                    // Clone the insert data before adding the channel ID
+                    var insert = JSON.parse(JSON.stringify(data));
+                    insert.channel_id = channel.channel_id;
+                    
+                    model.mysql.query("Insert into `access` set ? on duplicate key update ?", [insert, data], callback);
+                }
+                else if(action == 'remove')
+                {
+                    model.mysql.query("Delete from `access` where `channel_id` = ? and `account_id` = ?", [channel.channel_id, data.account_id], callback);
+                }
+            });
+        },
+
+        admin: function(select, action, data, callback)
+        {
+            if(action == 'add')
+            {
+
+            }
+            else if(action == 'remove')
+            {
+
+            }
         }
     },
 
