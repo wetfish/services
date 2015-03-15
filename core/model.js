@@ -250,7 +250,7 @@ var model =
         get: function(select, callback)
         {
             select = model.where(select);
-            model.mysql.query("Select * from `channels` where "+select.where+" limit 1", select.values, function(error, response)
+            var query = model.mysql.query("Select * from `channels` where "+select.where+" limit 1", select.values, function(error, response)
             {
                 if(error || !response.length)
                 {
@@ -308,13 +308,11 @@ var model =
                 // Get channel data
                 model.channel.get({name: select.channel}, function(error, channel)
                 {
-                    if(error || !response.length)
+                    if(error || !channel)
                     {
-                        callback(error, response);
+                        callback(error, channel);
                         return;
                     }
-
-                    var channel = response[0];
                     
                     // Select this user from the access table
                     model.mysql.query("Select * from `access` where `channel_id` = ? and `account_id` = ?", [channel.channel_id, user.account_id], callback);

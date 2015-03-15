@@ -122,7 +122,7 @@ var chanserv =
 
     events:
     {
-        client: ['raw', 'message'],
+        client: ['raw', 'message', 'join'],
         redis: ['message']
     },
 
@@ -197,6 +197,42 @@ var chanserv =
         }
     },
 
+    client_join: function(channel, username, details)
+    {
+        // See if this user is logged in
+        chanserv.auth(username, function(error, user)
+        {
+            if(error)
+            {
+                return;
+            }
+
+            // See if this user has access
+            model.access.get({channel: channel, user: username}, function(error, response)
+            {
+                if(response.length)
+                {
+                    var access = response[0];
+
+                    if(!access.modes.length)
+                    {
+                        return;
+                    }
+                    
+                    // Create an array with the user's name repeated as many times as they have modes
+                    var input = Array.prototype.map.call([]+Array(access.modes.length),function(){ return username; })
+
+                    // Put other arguments into the input array
+                    input.unshift(access.modes);
+                    input.unshift(channel);
+                    input.unshift('samode');
+                    
+                    client.send.apply(client, input);
+                }
+            });
+        });
+    },
+
     redis_message: function()
     {
         console.log(arguments);
@@ -260,7 +296,7 @@ var chanserv =
                             modes: '+o'
                         }
                         
-                        model.channel.access({name: channel}, 'add', access);
+                        model.access.add({name: channel}, access);
                         
                         // Set registered channel modes
                         client.send('samode', channel, '+Pr');
