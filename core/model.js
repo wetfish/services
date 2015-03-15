@@ -247,15 +247,31 @@ var model =
             model.mysql.query("Insert into `channels` set ?, `registered` = now()", channel, callback);
         },
 
-        set: function(select, data, callback)
+        get: function(channel, callback)
         {
             select = model.where(select);
+            model.mysql.query("Select * from `channels` where "+select.where+" limit 1", select.values, function(error, response)
+            {
+                if(error || !response.length)
+                {
+                    callback(error, response);
+                    return;
+                }
+
+                var channel = response[0];
+                callback(error, channel);
+            });
+        },
+
+        set: function(channel, data, callback)
+        {
+            select = model.where(channel);
             select.values.unshift(data);
             
             model.mysql.query("Update `channels` set ? where "+select.where, select.values, callback);
         },
 
-        access: function(channel, user, callback)
+        access: function(channel, action, data, callback)
         {
 
         }
