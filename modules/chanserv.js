@@ -6,7 +6,7 @@ var client, core, model;
 // Channel services
 var chanserv =
 {
-    modes: {},          // Object for storing user modes from whois data
+    users: {},          // Object for storing user modes from whois data
     channels: {},       // Temporary object for storing names in channels being verified
 
     //
@@ -28,6 +28,8 @@ var chanserv =
     // Check if a user is logged in
     auth: function(username, callback)
     {
+        username = username.toLowerCase();
+
         // Check if username is actually registered
         model.user.name({name: username}, function(error, response)
         {
@@ -37,11 +39,11 @@ var chanserv =
             }
 
             var user = response[0];
-            
+
             // Now check if this user is logged in
             client.whois(username, function()
             {
-                if(chanserv.modes[username] && chanserv.modes[username].indexOf('r') > -1)
+                if(chanserv.users[username] && chanserv.users[username].indexOf('r') > -1)
                 {
                     return callback(false, user);
                 }
@@ -75,10 +77,10 @@ var chanserv =
                 // If the user is the channel owner, or has admin access
                 if(response.channel.owner == response.user.account_id || response.access.admin)
                 {
-                    callback(false, response);
+                    return callback(false, response);
                 }
 
-                callback(true, response);
+                return callback(true, response);
             });
         });
     },
@@ -128,7 +130,7 @@ var chanserv =
         {
             if(error || !response.length)
             {
-                console.log(eerror, response);
+                console.log(error, response);
                 return;
             }
             
@@ -230,10 +232,10 @@ var chanserv =
         // User mode information sent with whois
         else if(input.rawCommand == 379)
         {
-            var user = input.args[1];
+            var user = input.args[1].toLowerCase();
             var modes = input.args[2].match(/^is using modes \+([^ ]*)/);
-            
-            chanserv.modes[user] = modes[1];
+
+            chanserv.users[user] = modes[1];
         }
 
         else if(input.command == "rpl_namreply")
@@ -387,19 +389,60 @@ var chanserv =
         });
     },
 
-    _mode: function(from, to, input)
+    _mode: function(username, channel, input)
     {
         console.log("control freak?");
     },
 
-    _access: function(from, to, input)
+    _access: function(username, channel, input)
     {
-        chanserv.admin(to, from, function()
+        chanserv.admin(channel, username, function(error, response)
         {
+            if(error)
+            {
+                client.say(username, "Sorry! You do not have access to this channel.");
+                return;
+            }
 
+            var action = input.shift();
+            var target = input.shift();
+            var modes = input.shift();
+
+            // Check if the target is a registered name
+            model.user.name({name: target}, function(error, response)
+            {
+                if(error || !response.length)
+                {
+                    client.say(username, "Sorry! The user "+target+" is not registered.");
+                    return;
+                }
+
+                var user = response[0];
+
+                if(action == 'add')
+                {
+                    var access =
+                    {
+                        account_id: user.account_id,
+                        admin: 0,
+                        modes: modes
+                    }
+
+                    // Save user access
+                    model.access.add({name: channel}, access, function(error, response)
+                    {
+                        if(!error)
+                        {
+                            // Try to give access to the user if they're already logged in
+                            chanserv.modes(channel, target);
+
+                            client.say(username, "Alright! The user "+target+" will be automatically given: " + modes);
+                            return;
+                        }
+                    });                
+                }
+            });
         });
-        
-        console.log("so permissive~~");
     },
 
     _admin: function()
