@@ -320,7 +320,24 @@ var model =
                     }
                     
                     // Select this user from the access table
-                    model.mysql.query("Select * from `access` where `channel_id` = ? and `account_id` = ?", [channel.channel_id, user.account_id], callback);
+                    model.mysql.query("Select * from `access` where `channel_id` = ? and `account_id` = ?", [channel.channel_id, user.account_id], function(error, response)
+                    {
+                        var access = false;
+                        
+                        if(response && response.length)
+                        {
+                            access = response[0];
+                        }
+                        
+                        var data =
+                        {
+                            user: user,
+                            channel: channel,
+                            access: access
+                        }
+                        
+                        callback(error, data);
+                    });
                 });
             });
         },

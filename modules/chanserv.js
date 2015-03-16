@@ -51,6 +51,38 @@ var chanserv =
         });
     },
 
+    // Check if a user has admin access
+    admin: function(channel, username, callback)
+    {
+        // First check if the user is even logged in
+        chanserv.auth(username, function(error, response)
+        {
+            if(error)
+            {
+                callback(error, response);
+                return;
+            }
+
+            // Now check if the user has access in the channel
+            model.access.get({channel: channel, user: username}, function(error, response)
+            {
+                if(error)
+                {
+                    console.log(error);
+                    return;
+                }
+
+                // If the user is the channel owner, or has admin access
+                if(response.channel.owner == response.user.account_id || response.access.admin)
+                {
+                    callback(false, response);
+                }
+
+                callback(true, response);
+            });
+        });
+    },
+
     // Apply saved user modes
     modes: function(channel, username)
     {
@@ -65,9 +97,9 @@ var chanserv =
             // See if this user has access
             model.access.get({channel: channel, user: username}, function(error, response)
             {
-                if(response.length)
+                if(response.access)
                 {
-                    var access = response[0];
+                    var access = response.access;
 
                     if(!access.modes.length)
                     {
@@ -360,9 +392,14 @@ var chanserv =
         console.log("control freak?");
     },
 
-    _access: function()
+    _access: function(from, to, input)
     {
-        console.log("so permissive~");
+        chanserv.admin(to, from, function()
+        {
+
+        });
+        
+        console.log("so permissive~~");
     },
 
     _admin: function()
