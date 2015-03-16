@@ -137,9 +137,9 @@ var chanserv =
             for(var i = 0, l = response.length; i < l; i++)
             {
                 var channel = response[i];
-                client.join(channel.name, function()
+                client.join(channel.name, function(user, details)
                 {
-                    client.send('samode', channel.name, '+qo', 'ChanServ', 'ChanServ');
+                    client.send('samode', details.args[0], '+qo', 'ChanServ', 'ChanServ');
                 });
             }
         });
