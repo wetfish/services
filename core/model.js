@@ -250,7 +250,7 @@ var model =
         get: function(select, callback)
         {
             select = model.where(select);
-            var query = model.mysql.query("Select * from `channels` where "+select.where+" limit 1", select.values, function(error, response)
+            model.mysql.query("Select * from `channels` where "+select.where+" limit 1", select.values, function(error, response)
             {
                 if(error || !response.length)
                 {
@@ -261,6 +261,11 @@ var model =
                 var channel = response[0];
                 callback(error, channel);
             });
+        },
+
+        list: function(callback)
+        {
+            model.mysql.query("Select * from `channels`", callback);
         },
 
         set: function(select, data, callback)

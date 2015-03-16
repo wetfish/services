@@ -20,6 +20,9 @@ var chanserv =
 
         // Set nickname
         client.send('sanick', client.nick, 'ChanServ');
+
+        // Join registered channels
+        chanserv.join();
     },
 
     // Check if a user is logged in
@@ -30,7 +33,6 @@ var chanserv =
         {
             if(error || !response.length)
             {
-                console.log(error, response);
                 return callback(true);
             }
 
@@ -83,6 +85,29 @@ var chanserv =
                     client.send.apply(client, input);
                 }
             });
+        });
+    },
+
+    // Join all registered channels
+    join: function()
+    {
+        // Get all registered channels
+        model.channel.list(function(error, response)
+        {
+            if(error || !response.length)
+            {
+                console.log(eerror, response);
+                return;
+            }
+            
+            for(var i = 0, l = response.length; i < l; i++)
+            {
+                var channel = response[i];
+                client.join(channel.name, function()
+                {
+                    client.send('samode', channel.name, '+qo', 'ChanServ', 'ChanServ');
+                });
+            }
         });
     },
 
@@ -352,7 +377,6 @@ var chanserv =
 
     '_!op': function(from, to, input)
     {
-        console.log(arguments);
         chanserv.modes(to, from);
     },
 
