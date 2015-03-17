@@ -397,7 +397,7 @@ var chanserv =
                         {
                             account_id: user.account_id,
                             admin: 1,
-                            modes: '+o'
+                            modes: '+oa'
                         }
                         
                         model.access.add({name: channel}, access);
@@ -444,7 +444,7 @@ var chanserv =
 
             var action = input.shift();
             var target = input.shift();
-            var modes = input.shift();
+            var modes = model.sanitize.modes(input.shift());
 
             // Check if the target is a registered name
             model.user.name({name: target}, function(error, response)
@@ -459,6 +459,16 @@ var chanserv =
 
                 if(action == 'add')
                 {
+                    if(!modes)
+                    {
+                        client.say(username, "Sorry! You didn't specify any valid modes.");
+                        client.say(username, " - Valid modes are: +a, +o, +h, or +v");
+                        client.say(username, " - For example: /msg ChanServ access #wetfish add rachel +ao");
+                        return;
+                    }
+
+                    modes = "+" + modes;
+                    
                     var access =
                     {
                         account_id: user.account_id,

@@ -348,6 +348,14 @@ var model =
         }
     },
 
+    sanitize:
+    {
+        modes: function(input)
+        {
+            return input.replace(/[^aohv]/g, '');
+        }
+    },
+
     // Database triggered events
     ////////////////////////////////////////
     
