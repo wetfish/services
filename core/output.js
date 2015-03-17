@@ -1,15 +1,21 @@
 var output =
 {
     client: false,
-    methods: ['message', 'action', 'join', 'part', 'quit', 'nick', 'kick', 'error', 'raw'],
+    methods: ['message', 'action', 'error', 'raw'],
 
     message: function(from, to, message, details)
     {
+        // Only output private messages
+        if(to[0] == "#") return;
+        
         console.log("["+to+"] <"+from+"> "+message);
     },
 
     action: function(from, to, message, details)
     {
+        // Only output private messages
+        if(to[0] == "#") return;
+
         console.log("["+to+"] * "+from+" "+message);
     },
 
