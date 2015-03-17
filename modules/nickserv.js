@@ -226,7 +226,7 @@ var nickserv =
     // Bot commands
     ////////////////////////////////////////
     
-    commands: ['help', 'register', 'login', 'ghost', 'host'],
+    commands: ['help', 'register', 'identify', 'login', 'ghost', 'host'],
 
     _help: function(user, message)
     {
@@ -276,6 +276,12 @@ var nickserv =
                 });
             }
         });        
+    },
+
+    // A wrapper for login
+    _identify: function(user, message)
+    {
+        nickserv._login(user, message);
     },
 
     _login: function(user, message)
