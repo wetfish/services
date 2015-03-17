@@ -308,7 +308,45 @@ var chanserv =
     // Bot commands
     ////////////////////////////////////////
     
-    commands: ['register', 'mode', 'access', 'admin', 'owner', '!op', '!power'],
+    commands: ['help', 'register', 'mode', 'access', 'admin', 'owner', '!op', '!power'],
+
+    _help: function(user, message)
+    {
+        client.say(user, "Channel Services for FishNet");
+        client.say(user, "========================================");
+        client.say(user, " ");
+        client.say(user, "Available commands:");
+        client.say(user, " ");
+        client.say(user, " - /msg ChanServ register [channel]");
+        client.say(user, "  - Register the requested channel.");
+        client.say(user, "  - You'll need to be logged in with NickServ and have +o in the channel.");
+        client.say(user, " ");
+        client.say(user, " - /msg ChanServ access [channel] [add|remove] [user] [modes]");
+        client.say(user, "  - Automatically give someone modes in your channel.");
+        client.say(user, "  - The user will only be given these modes if they are logged in.");
+        client.say(user, "  - For example: /msg ChanServ access #wetfish add fishy +h");
+        client.say(user, " ");
+        client.say(user, " - /msg ChanServ admin [channel] [add|remove] [user]");
+        client.say(user, "  - Give someone admin access to your channel.");
+        client.say(user, "  - This lets them modify the channel access list.");
+        client.say(user, " ");
+        client.say(user, " - /msg ChanServ owner [channel]");
+        client.say(user, "  - Give another user channel ownership.");
+        client.say(user, "  - This will remove you as the channel owner.");
+        client.say(user, " ");
+        client.say(user, "Other Features:");
+        client.say(user, " ");
+        client.say(user, " - !op / !power");
+        client.say(user, "  - In a registered channel, saying !op will give you the modes that have been assigned to you.");
+        client.say(user, " ");
+        client.say(user, " - Optional [channel] parameter");
+        client.say(user, "  - In a registered channel, the [channel] parameter can be ommitted from commands.");
+        client.say(user, "  - In PM, the [channel] parameter is required: /msg ChanServ access #wetfish add rachel +o");
+        client.say(user, "  - In a channel, the [channel] parameter is implicit: /msg #wetfish access add rachel +o");
+        client.say(user, " ");
+        client.say(user, "========================================");
+        client.say(user, "For information on registering your name, type /msg NickServ help");
+    },
 
     _register: function(username, channel, input)
     {
@@ -445,14 +483,14 @@ var chanserv =
         });
     },
 
-    _admin: function()
+    _admin: function(username, channel, input)
     {
-        console.log("friendship engaged");
+        client.say(username, "Sorry! This command is not available yet. Please complain to rachel");
     },
 
     _owner: function()
     {
-        console.log("goodbye old friend");
+        client.say(username, "Sorry! This command is not available yet. Please complain to rachel");
     },
 
     '_!op': function(from, to, input)

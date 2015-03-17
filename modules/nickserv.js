@@ -230,7 +230,7 @@ var nickserv =
 
     _help: function(user, message)
     {
-        client.say(user, "Hi there, I'm NickServ!");
+        client.say(user, "User Services for FishNet");
         client.say(user, "========================================");
         client.say(user, " ");
         client.say(user, "Available commands:");
