@@ -226,7 +226,36 @@ var nickserv =
     // Bot commands
     ////////////////////////////////////////
     
-    commands: ['register', 'login', 'ghost', 'host'],
+    commands: ['help', 'register', 'login', 'ghost', 'host'],
+
+    _help: function(user, message)
+    {
+        client.say(user, "Hi there, I'm NickServ!");
+        client.say(user, "========================================");
+        client.say(user, " ");
+        client.say(user, "Available commands:");
+        client.say(user, " ");
+        client.say(user, " - /msg NickServ register");
+        client.say(user, "  - Register your current name.");
+        client.say(user, "  - You'll be asked to log into your wetfish account for verification.");
+        client.say(user, "  - If you don't have a wetfish account, you'll need to register one!");
+        client.say(user, " ");
+        client.say(user, " - /msg NickServ login");
+        client.say(user, "  - Login using your current name.");
+        client.say(user, "  - You'll be asked to log into your wetfish account for verification.");
+        client.say(user, " ");
+        client.say(user, " - /msg NickServ ghost [username]");
+        client.say(user, "  - Disconnect someone using a name you've registered.");
+        client.say(user, "  - You'll be asked to log into your wetfish account for verification.");
+        client.say(user, " ");
+        client.say(user, " - /msg NickServ host [hostname]");
+        client.say(user, "  - Give yourself a custom hostname.");
+        client.say(user, "  - This is the address which appears after your name in a /whois");
+        client.say(user, "  - For example: rachel@unicorn.sparkle.princess");
+        client.say(user, " ");
+        client.say(user, "========================================");
+        client.say(user, "For information on registering a channel, type /msg ChanServ help");
+    },
 
     _register: function(user, message)
     {
