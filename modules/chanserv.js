@@ -308,7 +308,7 @@ var chanserv =
     // Bot commands
     ////////////////////////////////////////
     
-    commands: ['help', 'register', 'mode', 'access', 'admin', 'owner', '!op', '!power'],
+    commands: ['help', 'register', 'mode', 'access', 'admin', 'owner', '!op', '!power', '!deop', '!down'],
 
     _help: function(user, message)
     {
@@ -338,6 +338,9 @@ var chanserv =
         client.say(user, " ");
         client.say(user, " - !op / !power");
         client.say(user, "  - In a registered channel, saying !op will give you the modes that have been assigned to you.");
+        client.say(user, " ");
+        client.say(user, " - !deop / !down");
+        client.say(user, "  - In a registered channel, saying !deop will remove any modes that have been assigned to you.");
         client.say(user, " ");
         client.say(user, " - Optional [channel] parameter");
         client.say(user, "  - In a registered channel, the [channel] parameter can be ommitted from commands.");
@@ -512,6 +515,17 @@ var chanserv =
     '_!power': function(from, to, input)
     {
         chanserv['_!op'](from, to, input);
+    },
+
+    '_!deop': function(username, channel, input)
+    {
+        client.send('samode', channel, '-aohv', username, username, username, username);
+    },
+
+    // Wrapper for !deop
+    '_!down': function(username, channel, input)
+    {
+        chanserv['_!deop'](username, channel, input);
     }
 }
 
