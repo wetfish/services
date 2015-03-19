@@ -442,7 +442,7 @@ var chanserv =
             if(error)
             {
                 console.log(error);
-                client.say(username, "Sorry! You do not have access to this channel.");
+                client.say(username, "Sorry! You do not have access to " + channel + ".");
                 return;
             }
 
@@ -487,7 +487,7 @@ var chanserv =
                             // Try to give access to the user if they're already logged in
                             chanserv.modes(channel, target);
 
-                            client.say(username, "Alright! The user "+target+" will be automatically given: " + modes);
+                            client.say(username, "Alright! The user "+target+" will be automatically given: " + modes + " in " + channel + ".");
                             return;
                         }
                     });
@@ -499,7 +499,7 @@ var chanserv =
                         // Remove any modes from the user
                         chanserv['_!deop'](target, channel);
                         
-                        client.say(username, "Alright! The user "+target+" no longer has channel access.");
+                        client.say(username, "Alright! The user "+target+" no longer has channel access to " + channel + ".");
                         return;
                     });
                 }
@@ -514,7 +514,7 @@ var chanserv =
             if(error)
             {
                 console.log(error);
-                client.say(username, "Sorry! You do not have access to this channel.");
+                client.say(username, "Sorry! You do not have access to " + channel + ".");
                 return;
             }
 
@@ -545,7 +545,7 @@ var chanserv =
                     {
                         if(!error)
                         {
-                            client.say(username, "Alright! The user "+target+" is now an admin.");
+                            client.say(username, "Alright! The user "+target+" is now an admin in " + channel + ".");
                             return;
                         }
                     });
@@ -563,7 +563,7 @@ var chanserv =
                     {
                         if(!error)
                         {
-                            client.say(username, "Alright! The user "+target+" is no longer an admin.");
+                            client.say(username, "Alright! The user "+target+" is no longer an admin in " + channel + ".");
                             return;
                         }
                     });
@@ -579,7 +579,7 @@ var chanserv =
             if(error)
             {
                 console.log(error);
-                client.say(username, "Sorry! You do not have access to this channel.");
+                client.say(username, "Sorry! You do not have access to " + channel + ".");
                 return;
             }
 
@@ -603,7 +603,7 @@ var chanserv =
 
                 var user = response[0];
                 model.channel.set({name: channel}, {owner: user.account_id});
-                client.say(username, "Done! You've resigned from your role as channel owner and given ownership to "+target+".");
+                client.say(username, "Done! You've resigned from your role as channel owner of "+ channel +" and given ownership to "+target+".");
             });
         });
     },
