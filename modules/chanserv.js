@@ -572,9 +572,40 @@ var chanserv =
         })
     },
 
-    _owner: function()
+    _owner: function(username, channel, input)
     {
-        client.say(username, "Sorry! This command is not available yet. Please complain to rachel");
+        chanserv.admin(channel, username, function(error, response)
+        {
+            if(error)
+            {
+                console.log(error);
+                client.say(username, "Sorry! You do not have access to this channel.");
+                return;
+            }
+
+            // Make sure this user is actually the channel owner
+            if(response.channel.owner != response.user.account_id)
+            {
+                client.say(username, "Sorry! Only a channel owner can use this command.");
+                return;
+            }
+
+            var target = input.shift();
+
+            // Check if the target is a registered name
+            model.user.name({name: target}, function(error, response)
+            {
+                if(error || !response.length)
+                {
+                    client.say(username, "Sorry! The user "+target+" is not registered.");
+                    return;
+                }
+
+                var user = response[0];
+                model.channel.set({name: channel}, {owner: user.account_id});
+                client.say(username, "Done! You've resigned from your role as channel owner and given ownership to "+target+".");
+            });
+        });
     },
 
     '_!op': function(from, to, input)
