@@ -344,7 +344,17 @@ var model =
 
         delete: function(select, callback)
         {
-            model.mysql.query("Delete from `access` where `channel_id` = ? and `account_id` = ?", [select.channel_id, select.account_id], callback);
+            // Get channel data
+            model.channel.get({name: select.channel}, function(error, channel)
+            {
+                if(error || !channel)
+                {
+                    callback(error, channel);
+                    return;
+                }
+
+                model.mysql.query("Delete from `access` where `channel_id` = ? and `account_id` = ?", [channel.channel_id, select.user.account_id], callback);
+            });
         }
     },
 

@@ -441,6 +441,7 @@ var chanserv =
         {
             if(error)
             {
+                console.log(error);
                 client.say(username, "Sorry! You do not have access to this channel.");
                 return;
             }
@@ -475,7 +476,6 @@ var chanserv =
                     var access =
                     {
                         account_id: user.account_id,
-                        admin: 0,
                         modes: modes
                     }
 
@@ -491,6 +491,17 @@ var chanserv =
                             return;
                         }
                     });                
+                }
+                else if(action == 'remove')
+                {
+                    model.access.delete({channel: channel, user: user}, function(error, response)
+                    {
+                        // Remove any modes from the user
+                        chanserv['_!deop'](target, channel);
+                        
+                        client.say(username, "Alright! The user "+target+" no longer has channel access.");
+                        return;
+                    });
                 }
             });
         });
