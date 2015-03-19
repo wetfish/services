@@ -490,7 +490,7 @@ var chanserv =
                             client.say(username, "Alright! The user "+target+" will be automatically given: " + modes);
                             return;
                         }
-                    });                
+                    });
                 }
                 else if(action == 'remove')
                 {
@@ -509,7 +509,49 @@ var chanserv =
 
     _admin: function(username, channel, input)
     {
-        client.say(username, "Sorry! This command is not available yet. Please complain to rachel");
+        chanserv.admin(channel, username, function(error, response)
+        {
+            if(error)
+            {
+                console.log(error);
+                client.say(username, "Sorry! You do not have access to this channel.");
+                return;
+            }
+
+            var action = input.shift();
+            var target = input.shift();
+
+            // Check if the target is a registered name
+            model.user.name({name: target}, function(error, response)
+            {
+                if(error || !response.length)
+                {
+                    client.say(username, "Sorry! The user "+target+" is not registered.");
+                    return;
+                }
+
+                var user = response[0];
+
+                if(action == 'add')
+                {
+                    var access =
+                    {
+                        account_id: user.account_id,
+                        admin: 1
+                    }
+
+                    // Save user access
+                    model.access.add({name: channel}, access, function(error, response)
+                    {
+                        if(!error)
+                        {
+                            client.say(username, "Alright! The user "+target+" is now an admin.");
+                            return;
+                        }
+                    });
+                }
+            })
+        })
     },
 
     _owner: function()
