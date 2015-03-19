@@ -550,6 +550,24 @@ var chanserv =
                         }
                     });
                 }
+                else if(action == 'remove')
+                {
+                    var access =
+                    {
+                        account_id: user.account_id,
+                        admin: 0
+                    }
+
+                    // Save user access
+                    model.access.add({name: channel}, access, function(error, response)
+                    {
+                        if(!error)
+                        {
+                            client.say(username, "Alright! The user "+target+" is no longer an admin.");
+                            return;
+                        }
+                    });
+                }
             })
         })
     },
