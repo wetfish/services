@@ -295,12 +295,39 @@ var nickserv =
             }
             else
             {
-                // Generate a unique token for this request
-                model.token.set(user, "login", function(token)
+                if(message.length)
                 {
-                    // Notify the user
-                    client.say(user, "Logging in as "+user+"! Please visit https://services.wetfish.net/token/"+token+" to authorize this action.");
-                });
+                    var loginToken = message.shift();
+
+                    login.verify(loginToken, function(verified)
+                    {
+                        if(verified.status == "success")
+                        {
+                            // Trigger redis message
+                            nickserv.redis_message("login", JSON.stringify({session: verified.data, name: user}));
+                        }
+                        else
+                        {
+                            client.say(user, "Sorry! The token you entered is invalid. It may have expired or been revoked.");
+
+                            // Generate a unique token for this request
+                            model.token.set(user, "login", function(token)
+                            {
+                                // Notify the user
+                                client.say(user, "To continue logging in as "+user+" please visit https://services.wetfish.net/token/"+token);
+                            });
+                        }
+                    });
+                }
+                else
+                {
+                    // Generate a unique token for this request
+                    model.token.set(user, "login", function(token)
+                    {
+                        // Notify the user
+                        client.say(user, "Logging in as "+user+"! Please visit https://services.wetfish.net/token/"+token+" to authorize this action.");
+                    });
+                }
             }
         });
     },
