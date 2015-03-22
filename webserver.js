@@ -31,7 +31,7 @@ app.get('/login', function(req, res)
             req.session.user = verified.data;
 
             // Save valid token for later
-            req.session.login = {token: req.query.token};
+            req.session.user.login = {token: req.query.token};
 
             // If there's a token to redirect to
             if(req.session.token)

@@ -125,6 +125,13 @@ var nickserv =
                 else
                 {
                     client.say(user.name, "Congrats! You're the proud new owner of the name "+user.name);
+
+                    if(typeof user.session.login != "undefined")
+                    {
+                        client.say(user.name, "In the future, you can login automatically without a browser by using this command:");
+                        client.say(user.name, "/msg NickServ identify "+user.session.login.token);
+                    }
+
                     var slots = 3 - account.names.length;
 
                     if(slots > 1)
@@ -179,6 +186,12 @@ var nickserv =
                         }
 
                         client.say(user.name, "You are now logged in!");
+
+                        if(typeof user.session.login != "undefined")
+                        {
+                            client.say(user.name, "In the future, you can login automatically without a browser by using this command:");
+                            client.say(user.name, "/msg NickServ identify "+user.session.login.token);
+                        }
                     }
                     else
                     {
