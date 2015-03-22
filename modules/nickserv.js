@@ -257,6 +257,10 @@ var nickserv =
         client.say(user, "  - Login using your current name.");
         client.say(user, "  - You'll be asked to log into your wetfish account for verification.");
         client.say(user, " ");
+        client.say(user, " - /msg NickServ identify [code]");
+        client.say(user, "  - Login using a saved token.");
+        client.say(user, "  - After verifying your account, you can use a special code to login from IRC.");
+        client.say(user, " ");
         client.say(user, " - /msg NickServ ghost [username]");
         client.say(user, "  - Disconnect someone using a name you've registered.");
         client.say(user, "  - You'll be asked to log into your wetfish account for verification.");
