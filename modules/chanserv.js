@@ -308,7 +308,7 @@ var chanserv =
     // Bot commands
     ////////////////////////////////////////
     
-    commands: ['help', 'register', 'mode', 'access', 'admin', 'owner', '!op', '!power', '!deop', '!down'],
+    commands: ['help', 'register', 'mode', 'access', 'admin', 'owner', '!op', '!up', '!power', '!deop', '!down'],
 
     _help: function(user, message)
     {
@@ -611,6 +611,12 @@ var chanserv =
     '_!op': function(from, to, input)
     {
         chanserv.modes(to, from);
+    },
+
+    // Wrapper for !op
+    '_!up': function(from, to, input)
+    {
+        chanserv['_!op'](from, to, input);
     },
 
     // Wrapper for !op
