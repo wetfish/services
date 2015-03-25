@@ -180,6 +180,12 @@ var chanserv =
 
         return output;
     },
+
+    // Subscribe to redis events
+    subscribe: function()
+    {
+        model.redisIPC.subscribe("verified");
+    },
     
     // Bind and unbind events
     bind: function()
@@ -299,9 +305,26 @@ var chanserv =
         chanserv.modes(channel, username);
     },
 
-    redis_message: function()
+    redis_message: function(command, user)
     {
-        console.log(arguments);
+        user = JSON.parse(user);
+        
+        if(command == 'verified')
+        {
+            // TODO: Get access values from this query directly?
+            model.user.channels(user.name, function(error, response)
+            {
+                if(!error && response.length)
+                {
+                    // Loop through all channels and apply user modes
+                    for(var i = 0, l = response.length; i < l; i++)
+                    {
+                        var channel = response[i];
+                        chanserv.modes(channel.name, user.name);
+                    }
+                }
+            });
+        }
     },
 
     //
@@ -336,7 +359,7 @@ var chanserv =
         client.say(user, " ");
         client.say(user, "Other Features:");
         client.say(user, " ");
-        client.say(user, " - !op / !power");
+        client.say(user, " - !op / !up");
         client.say(user, "  - In a registered channel, saying !op will give you the modes that have been assigned to you.");
         client.say(user, " ");
         client.say(user, " - !deop / !down");
@@ -644,6 +667,9 @@ module.exports =
         client = _client;
         core = _core;
         model = _core.model;
+
+        // Subscribe to redis events
+        chanserv.subscribe();
 
         // Bind event listeners
         chanserv.bind();

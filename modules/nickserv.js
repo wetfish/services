@@ -153,8 +153,9 @@ var nickserv =
                     }
                     
                     client.send('samode', user.name, '+r');
+                    model.redis.publish('verified', JSON.stringify(user));
                 }
-            });            
+            });
         }
         else if(command == 'login')
         {            
@@ -192,6 +193,8 @@ var nickserv =
                             client.say(user.name, "In the future, you can login automatically without a browser by using this command:");
                             client.say(user.name, "/msg NickServ identify "+user.session.login.token);
                         }
+
+                        model.redis.publish('verified', JSON.stringify(user));
                     }
                     else
                     {

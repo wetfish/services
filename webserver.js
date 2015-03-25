@@ -84,7 +84,7 @@ app.get('/token/:token', function(req, res)
 
             console.log("Valid token: ", req.params.token, user);
 
-            model.redisIPC.publish(authorized.command, JSON.stringify(user));
+            model.redis.publish(authorized.command, JSON.stringify(user));
             res.send("Thank you! Your request has been authorized.");
         }
 

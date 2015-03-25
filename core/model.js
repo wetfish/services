@@ -237,6 +237,21 @@ var model =
                     model.mysql.query("Update `accounts` set `host` = ? where `account_id` = ?", [host, name.account_id], callback);
                 }
             });
+        },
+
+        // Get a list of channels a user has access to
+        channels: function(username, callback)
+        {
+            var query =
+            [
+                "Select channels.name",
+                "from channels, access, names",
+                "where names.name = ?",
+                "and names.account_id = access.account_id",
+                "and access.channel_id = channels.channel_id"
+            ];
+            
+            model.mysql.query(query.join(" "), username, callback);
         }
     },
 
