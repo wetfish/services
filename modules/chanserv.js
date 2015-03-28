@@ -333,45 +333,51 @@ var chanserv =
     
     commands: ['help', 'register', 'mode', 'access', 'admin', 'owner', '!op', '!up', '!power', '!deop', '!down'],
 
-    _help: function(user, message)
+    _help: function(username, channel, input)
     {
-        client.say(user, "Channel Services for FishNet");
-        client.say(user, "========================================");
-        client.say(user, " ");
-        client.say(user, "Available commands:");
-        client.say(user, " ");
-        client.say(user, " - /msg ChanServ register [channel]");
-        client.say(user, "  - Register the requested channel.");
-        client.say(user, "  - You'll need to be logged in with NickServ and have +o in the channel.");
-        client.say(user, " ");
-        client.say(user, " - /msg ChanServ access [channel] [add|remove] [user] [modes]");
-        client.say(user, "  - Automatically give someone modes in your channel.");
-        client.say(user, "  - The user will only be given these modes if they are logged in.");
-        client.say(user, "  - For example: /msg ChanServ access #wetfish add fishy +h");
-        client.say(user, " ");
-        client.say(user, " - /msg ChanServ admin [channel] [add|remove] [user]");
-        client.say(user, "  - Give someone admin access to your channel.");
-        client.say(user, "  - This lets them modify the channel access list.");
-        client.say(user, " ");
-        client.say(user, " - /msg ChanServ owner [channel]");
-        client.say(user, "  - Give another user channel ownership.");
-        client.say(user, "  - This will remove you as the channel owner.");
-        client.say(user, " ");
-        client.say(user, "Other Features:");
-        client.say(user, " ");
-        client.say(user, " - !op / !up");
-        client.say(user, "  - In a registered channel, saying !op will give you the modes that have been assigned to you.");
-        client.say(user, " ");
-        client.say(user, " - !deop / !down");
-        client.say(user, "  - In a registered channel, saying !deop will remove any modes that have been assigned to you.");
-        client.say(user, " ");
-        client.say(user, " - Optional [channel] parameter");
-        client.say(user, "  - In a registered channel, the [channel] parameter can be ommitted from commands.");
-        client.say(user, "  - In PM, the [channel] parameter is required: /msg ChanServ access #wetfish add rachel +o");
-        client.say(user, "  - In a channel, the [channel] parameter is implicit: /msg #wetfish access add rachel +o");
-        client.say(user, " ");
-        client.say(user, "========================================");
-        client.say(user, "For information on registering your name, type /msg NickServ help");
+        // Ignore help in channels
+        if(channel.indexOf('#') === 0)
+        {
+            return;
+        }
+        
+        client.say(username, "Channel Services for FishNet");
+        client.say(username, "========================================");
+        client.say(username, " ");
+        client.say(username, "Available commands:");
+        client.say(username, " ");
+        client.say(username, " - /msg ChanServ register [channel]");
+        client.say(username, "  - Register the requested channel.");
+        client.say(username, "  - You'll need to be logged in with NickServ and have +o in the channel.");
+        client.say(username, " ");
+        client.say(username, " - /msg ChanServ access [channel] [add|remove] [username] [modes]");
+        client.say(username, "  - Automatically give someone modes in your channel.");
+        client.say(username, "  - The username will only be given these modes if they are logged in.");
+        client.say(username, "  - For example: /msg ChanServ access #wetfish add fishy +h");
+        client.say(username, " ");
+        client.say(username, " - /msg ChanServ admin [channel] [add|remove] [username]");
+        client.say(username, "  - Give someone admin access to your channel.");
+        client.say(username, "  - This lets them modify the channel access list.");
+        client.say(username, " ");
+        client.say(username, " - /msg ChanServ owner [channel]");
+        client.say(username, "  - Give another username channel ownership.");
+        client.say(username, "  - This will remove you as the channel owner.");
+        client.say(username, " ");
+        client.say(username, "Other Features:");
+        client.say(username, " ");
+        client.say(username, " - !op / !up");
+        client.say(username, "  - In a registered channel, saying !op will give you the modes that have been assigned to you.");
+        client.say(username, " ");
+        client.say(username, " - !deop / !down");
+        client.say(username, "  - In a registered channel, saying !deop will remove any modes that have been assigned to you.");
+        client.say(username, " ");
+        client.say(username, " - Optional [channel] parameter");
+        client.say(username, "  - In a registered channel, the [channel] parameter can be ommitted from commands.");
+        client.say(username, "  - In PM, the [channel] parameter is required: /msg ChanServ access #wetfish add rachel +o");
+        client.say(username, "  - In a channel, the [channel] parameter is implicit: /msg #wetfish access add rachel +o");
+        client.say(username, " ");
+        client.say(username, "========================================");
+        client.say(username, "For information on registering your name, type /msg NickServ help");
     },
 
     _register: function(username, channel, input)
