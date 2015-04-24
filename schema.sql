@@ -28,10 +28,10 @@ CREATE TABLE IF NOT EXISTS `channels` (
   KEY `owner` (`owner`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `access` (
+CREATE TABLE IF NOT EXISTS `access_convert` (
   `channel_id` int(11) NOT NULL,
-  `account_id` int(11) NOT NULL,
+  `name` varchar(64) NOT NULL,
   `admin` tinyint(1) NOT NULL,
   `modes` varchar(32) NOT NULL,
-  PRIMARY KEY (`channel_id`,`account_id`)
+  PRIMARY KEY (`channel_id`,`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
