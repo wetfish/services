@@ -427,7 +427,7 @@ var chanserv =
                         // Give current user admin access
                         var access =
                         {
-                            account_id: user.account_id,
+                            name: username,
                             admin: 1,
                             modes: '+oa'
                         }
@@ -504,14 +504,18 @@ var chanserv =
                     
                     var access =
                     {
-                        account_id: user.account_id,
+                        name: target,
                         modes: modes
                     }
 
                     // Save user access
                     model.access.add({name: channel}, access, function(error, response)
                     {
-                        if(!error)
+                        if(error)
+                        {
+                            console.log(error, response);
+                        }                        
+                        else
                         {
                             // Try to give access to the user if they're already logged in
                             chanserv.modes(channel, target);
@@ -525,11 +529,18 @@ var chanserv =
                 {
                     model.access.delete({channel: channel, user: user}, function(error, response)
                     {
-                        // Remove any modes from the user
-                        chanserv['_!deop'](target, channel);
-                        
-                        client.say(username, "Alright! The user "+target+" no longer has channel access to " + channel + ".");
-                        return;
+                        if(error)
+                        {
+                            console.log(error, response);
+                        }
+                        else
+                        {
+                            // Remove any modes from the user
+                            chanserv['_!deop'](target, channel);
+                            
+                            client.say(username, "Alright! The user "+target+" no longer has channel access to " + channel + ".");
+                            return;
+                        }
                     });
                 }
             });
@@ -565,14 +576,18 @@ var chanserv =
                 {
                     var access =
                     {
-                        account_id: user.account_id,
+                        name: target,
                         admin: 1
                     }
 
                     // Save user access
                     model.access.add({name: channel}, access, function(error, response)
                     {
-                        if(!error)
+                        if(error)
+                        {
+                            console.log(error, response);
+                        }
+                        else
                         {
                             client.say(username, "Alright! The user "+target+" is now an admin in " + channel + ".");
                             return;
@@ -583,14 +598,18 @@ var chanserv =
                 {
                     var access =
                     {
-                        account_id: user.account_id,
+                        name: target,
                         admin: 0
                     }
 
                     // Save user access
                     model.access.add({name: channel}, access, function(error, response)
                     {
-                        if(!error)
+                        if(error)
+                        {
+                            console.log(error, response);
+                        }
+                        else
                         {
                             client.say(username, "Alright! The user "+target+" is no longer an admin in " + channel + ".");
                             return;

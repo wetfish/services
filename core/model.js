@@ -307,7 +307,7 @@ var model =
                 var insert = JSON.parse(JSON.stringify(data));
                 insert.channel_id = channel.channel_id;
                 
-                model.mysql.query("Insert into `access` set ? on duplicate key update ?", [insert, data], callback);
+                model.mysql.query("Insert into `access_convert` set ? on duplicate key update ?", [insert, data], callback);
             });
         },
 
@@ -376,6 +376,7 @@ var model =
     {
         modes: function(input)
         {
+            input = (input || '');
             return input.replace(/[^aohv]/g, '');
         }
     },
