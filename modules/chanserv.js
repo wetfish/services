@@ -650,7 +650,20 @@ var chanserv =
                 }
 
                 var user = response[0];
+
+                // Set the user as the channel owner
                 model.channel.set({name: channel}, {owner: user.account_id});
+
+                // Add channel access for the new owner
+                var access =
+                {
+                    name: target,
+                    admin: 1,
+                    modes: '+oa'
+                }
+                
+                model.access.add({name: channel}, access);
+                
                 client.say(username, "Done! You've resigned from your role as channel owner of "+ channel +" and given ownership to "+target+".");
             });
         });
