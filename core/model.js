@@ -245,10 +245,9 @@ var model =
             var query =
             [
                 "Select channels.name",
-                "from channels, access, names",
-                "where names.name = ?",
-                "and names.account_id = access.account_id",
-                "and access.channel_id = channels.channel_id"
+                "from channels, access_convert",
+                "where access_convert.name = ?",
+                "and access_convert.channel_id = channels.channel_id"
             ];
             
             model.mysql.query(query.join(" "), username, callback);
@@ -335,7 +334,7 @@ var model =
                     }
                     
                     // Select this user from the access table
-                    model.mysql.query("Select * from `access` where `channel_id` = ? and `account_id` = ?", [channel.channel_id, user.account_id], function(error, response)
+                    model.mysql.query("Select * from `access_convert` where `channel_id` = ? and `name` = ?", [channel.channel_id, user.name], function(error, response)
                     {
                         var access = false;
                         
@@ -368,7 +367,7 @@ var model =
                     return;
                 }
 
-                model.mysql.query("Delete from `access` where `channel_id` = ? and `account_id` = ?", [channel.channel_id, select.user.account_id], callback);
+                model.mysql.query("Delete from `access_convert` where `channel_id` = ? and `name` = ?", [channel.channel_id, select.user.name], callback);
             });
         }
     },
