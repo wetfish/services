@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS `channels` (
   KEY `owner` (`owner`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `access_convert` (
+CREATE TABLE IF NOT EXISTS `access` (
   `channel_id` int(11) NOT NULL,
   `name` varchar(64) NOT NULL,
   `admin` tinyint(1) NOT NULL,

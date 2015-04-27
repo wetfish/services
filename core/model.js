@@ -245,9 +245,9 @@ var model =
             var query =
             [
                 "Select channels.name",
-                "from channels, access_convert",
-                "where access_convert.name = ?",
-                "and access_convert.channel_id = channels.channel_id"
+                "from channels, access",
+                "where access.name = ?",
+                "and access.channel_id = channels.channel_id"
             ];
             
             model.mysql.query(query.join(" "), username, callback);
@@ -307,7 +307,7 @@ var model =
                 var insert = JSON.parse(JSON.stringify(data));
                 insert.channel_id = channel.channel_id;
                 
-                model.mysql.query("Insert into `access_convert` set ? on duplicate key update ?", [insert, data], callback);
+                model.mysql.query("Insert into `access` set ? on duplicate key update ?", [insert, data], callback);
             });
         },
 
@@ -334,7 +334,7 @@ var model =
                     }
                     
                     // Select this user from the access table
-                    model.mysql.query("Select * from `access_convert` where `channel_id` = ? and `name` = ?", [channel.channel_id, user.name], function(error, response)
+                    model.mysql.query("Select * from `access` where `channel_id` = ? and `name` = ?", [channel.channel_id, user.name], function(error, response)
                     {
                         var access = false;
                         
@@ -367,7 +367,7 @@ var model =
                     return;
                 }
 
-                model.mysql.query("Delete from `access_convert` where `channel_id` = ? and `name` = ?", [channel.channel_id, select.user.name], callback);
+                model.mysql.query("Delete from `access` where `channel_id` = ? and `name` = ?", [channel.channel_id, select.user.name], callback);
             });
         }
     },
