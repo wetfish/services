@@ -309,8 +309,6 @@ var chanserv =
     {
         user = JSON.parse(user);
 
-        console.log("VERIFIED USER:", user);
-        
         if(command == 'verified')
         {
             // TODO: Get access values from this query directly?

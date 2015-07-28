@@ -194,7 +194,11 @@ var nickserv =
                             client.say(user.name, "/msg NickServ identify "+user.session.login.token);
                         }
 
-                        model.redis.publish('verified', JSON.stringify(user));
+                        // Horrible hack to prevent samode race condition
+                        setTimeout(function()
+                        {
+                            model.redis.publish('verified', JSON.stringify(user));
+                        }, 1000);
                     }
                     else
                     {
