@@ -308,6 +308,8 @@ var chanserv =
     redis_message: function(command, user)
     {
         user = JSON.parse(user);
+
+        console.log("VERIFIED USER:", user);
         
         if(command == 'verified')
         {
