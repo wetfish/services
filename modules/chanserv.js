@@ -141,6 +141,9 @@ var chanserv =
                 {
                     client.send('samode', details.args[0], '+qo', 'ChanServ', 'ChanServ');
                 });
+
+                // Force join the channel (in case it's invite only)
+                client.send('sajoin', 'ChanServ', channel.name);
             }
         });
     },
