@@ -28,8 +28,6 @@ var chanserv =
     // Check if a user is logged in
     auth: function(username, callback)
     {
-        username = username.toLowerCase();
-
         // Check if username is actually registered
         model.user.name({name: username}, function(error, response)
         {
@@ -43,6 +41,8 @@ var chanserv =
             // Now check if this user is logged in
             client.whois(username, function()
             {
+                username = username.toLowerCase();
+
                 if(chanserv.users[username] && chanserv.users[username].indexOf('r') > -1)
                 {
                     return callback(false, user);
@@ -107,7 +107,7 @@ var chanserv =
                     {
                         return;
                     }
-                    
+
                     // Create an array with the user's name repeated as many times as they have modes
                     var input = Array.prototype.map.call([]+Array(access.modes.length),function(){ return username; })
 
@@ -115,7 +115,7 @@ var chanserv =
                     input.unshift(access.modes);
                     input.unshift(channel);
                     input.unshift('samode');
-                    
+
                     client.send.apply(client, input);
                 }
             });
@@ -133,7 +133,7 @@ var chanserv =
                 console.log(error, response);
                 return;
             }
-            
+
             for(var i = 0, l = response.length; i < l; i++)
             {
                 var channel = response[i];
@@ -159,12 +159,12 @@ var chanserv =
             '%': 'h',
             '+': 'v'
         };
-        
+
         // Ensure text is a string
         text = (typeof text == "string") ? text : '';
         var names = text.split(' ');
         var output = {};
-        
+
         for(var i = 0, l = names.length; i < l; i++)
         {
             var name = names[i];
@@ -189,7 +189,7 @@ var chanserv =
     {
         model.redisIPC.subscribe("verified");
     },
-    
+
     // Bind and unbind events
     bind: function()
     {
@@ -296,7 +296,7 @@ var chanserv =
             {
                 to = message.shift();
             }
-            
+
             // Call bot command handler function
             chanserv['_'+command](from, to, message);
         }
@@ -333,7 +333,7 @@ var chanserv =
     //
     // Bot commands
     ////////////////////////////////////////
-    
+
     commands: ['help', 'register', 'mode', 'access', 'admin', 'owner', '!op', '!up', '!power', '!deop', '!down'],
 
     _help: function(username, channel, input)
@@ -343,7 +343,7 @@ var chanserv =
         {
             return;
         }
-        
+
         client.say(username, "Channel Services for FishNet");
         client.say(username, "========================================");
         client.say(username, " ");
@@ -391,7 +391,7 @@ var chanserv =
             client.say(username, "For example: /msg ChanServ register #wetfish");
             return;
         }
-        
+
         chanserv.auth(username, function(error, user)
         {
             if(error)
@@ -434,9 +434,9 @@ var chanserv =
                             admin: 1,
                             modes: '+oa'
                         }
-                        
+
                         model.access.add({name: channel}, access);
-                        
+
                         // Set registered channel modes
                         client.send('samode', channel, '+Pr');
 
@@ -504,7 +504,7 @@ var chanserv =
                     }
 
                     modes = "+" + modes;
-                    
+
                     var access =
                     {
                         name: target,
@@ -517,7 +517,7 @@ var chanserv =
                         if(error)
                         {
                             console.log(error, response);
-                        }                        
+                        }
                         else
                         {
                             // Try to give access to the user if they're already logged in
@@ -540,7 +540,7 @@ var chanserv =
                         {
                             // Remove any modes from the user
                             chanserv['_!deop'](target, channel);
-                            
+
                             client.say(username, "Alright! The user "+target+" no longer has channel access to " + channel + ".");
                             return;
                         }
@@ -664,9 +664,9 @@ var chanserv =
                     admin: 1,
                     modes: '+oa'
                 }
-                
+
                 model.access.add({name: channel}, access);
-                
+
                 client.say(username, "Done! You've resigned from your role as channel owner of "+ channel +" and given ownership to "+target+".");
             });
         });
@@ -715,12 +715,12 @@ module.exports =
         // Bind event listeners
         chanserv.bind();
     },
-    
+
     unload: function(_client, _core)
     {
         // Unbind event listeners
         chanserv.unbind();
-        
+
         delete extend, events, event, client, core, model, chanserv;
     }
 }
